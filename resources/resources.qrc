@@ -1,0 +1,24 @@
+<RCC>
+  <qresource prefix="tk_multi_pythonconsole">
+    <file>clear.png</file>
+    <file>clear_disabled.png</file>
+    <file>clear_hover.png</file>
+    <file>clear_pressed.png</file>
+    <file>echo.png</file>
+    <file>echo_disabled.png</file>
+    <file>echo_hover.png</file>
+    <file>echo_pressed.png</file>
+    <file>execute.png</file>
+    <file>execute_disabled.png</file>
+    <file>execute_hover.png</file>
+    <file>execute_pressed.png</file>
+    <file>open.png</file>
+    <file>open_disabled.png</file>
+    <file>open_hover.png</file>
+    <file>open_pressed.png</file>
+    <file>save.png</file>
+    <file>save_disabled.png</file>
+    <file>save_hover.png</file>
+    <file>save_pressed.png</file>
+  </qresource>
+</RCC>

@@ -1,0 +1,147 @@
+/********************************************************************************************
+
+QT Stylesheet for the app. This file will be read every time an app dialog is created via
+the show_dialog, show_modal or show_panel methods.
+
+Certain keywords will be resolved, for example {{SG_HIGHLIGHT_COLOR}}.
+For a full list of keywords, call the app.style_constants property at runtime.
+
+For more info about QT stylesheets, please see http://doc.qt.io/qt-4.8/stylesheet.html
+
+********************************************************************************************/
+
+
+/* Get rid of borders for main Listing Views */
+QScrollArea {
+    border: none;
+}
+
+/* Ouptut Clear Button */
+QToolButton#out_clear_btn {
+    border: none;
+    background-color: none;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(:/tk_multi_pythonconsole/clear.png);
+}
+
+QToolButton:disabled#out_clear_btn {
+    background-image: url(:/tk_multi_pythonconsole/clear_disabled.png);
+}
+
+QToolButton:hover#out_clear_btn {
+    background-image: url(:/tk_multi_pythonconsole/clear_hover.png);
+}
+
+QToolButton:Pressed#out_clear_btn {
+    background-image: url(:/tk_multi_pythonconsole/clear_pressed.png);
+}
+
+/* Ouptut Echo Button */
+QToolButton#out_echo_btn {
+    border: none;
+    background-color: none;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(:/tk_multi_pythonconsole/echo.png);
+}
+
+QToolButton:disabled#out_echo_btn {
+    background-image: url(:/tk_multi_pythonconsole/echo_disabled.png);
+}
+
+QToolButton:hover#out_echo_btn {
+    background-image: url(:/tk_multi_pythonconsole/echo_hover.png);
+}
+
+QToolButton:Pressed#out_echo_btn {
+    background-image: url(:/tk_multi_pythonconsole/echo_pressed.png);
+}
+
+QToolButton#out_echo_btn:checked {
+    background-image: url(:/tk_multi_pythonconsole/echo_pressed.png);
+}
+
+/* Input Clear Button*/
+QToolButton#in_clear_btn {
+    border: none;
+    background-color: none;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(:/tk_multi_pythonconsole/clear.png);
+}
+
+QToolButton:disabled#in_clear_btn {
+    background-image: url(:/tk_multi_pythonconsole/clear_disabled.png);
+}
+
+QToolButton:hover#in_clear_btn {
+    background-image: url(:/tk_multi_pythonconsole/clear_hover.png);
+}
+
+QToolButton:Pressed#in_clear_btn {
+    background-image: url(:/tk_multi_pythonconsole/clear_pressed.png);
+}
+
+/* Input Open Button*/
+QToolButton#in_open_btn {
+    border: none;
+    background-color: none;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(:/tk_multi_pythonconsole/open.png);
+}
+
+QToolButton:disabled#in_open_btn {
+    background-image: url(:/tk_multi_pythonconsole/open_disabled.png);
+}
+
+QToolButton:hover#in_open_btn {
+    background-image: url(:/tk_multi_pythonconsole/open_hover.png);
+}
+
+QToolButton:Pressed#in_open_btn {
+    background-image: url(:/tk_multi_pythonconsole/open_pressed.png);
+}
+
+/* Input Save Button*/
+QToolButton#in_save_btn {
+    border: none;
+    background-color: none;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(:/tk_multi_pythonconsole/save.png);
+}
+
+QToolButton:disabled#in_save_btn {
+    background-image: url(:/tk_multi_pythonconsole/save_disabled.png);
+}
+
+QToolButton:hover#in_save_btn {
+    background-image: url(:/tk_multi_pythonconsole/save_hover.png);
+}
+
+QToolButton:Pressed#in_save_btn {
+    background-image: url(:/tk_multi_pythonconsole/save_pressed.png);
+}
+
+/* Input Execute Button*/
+QToolButton#in_exec_btn {
+    border: none;
+    background-color: none;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(:/tk_multi_pythonconsole/execute.png);
+}
+
+QToolButton:disabled#in_exec_btn {
+    background-image: url(:/tk_multi_pythonconsole/execute_disabled.png);
+}
+
+QToolButton:hover#in_exec_btn {
+    background-image: url(:/tk_multi_pythonconsole/execute_hover.png);
+}
+
+QToolButton:Pressed#in_exec_btn {
+    background-image: url(:/tk_multi_pythonconsole/execute_pressed.png);
+}
