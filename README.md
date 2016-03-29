@@ -10,7 +10,7 @@ houdini), the console will display in a docked panel. When using with older vers
 of these DCCs or in a DCC that does not support panels, the console will simply
 be shown as a regular Toolkit dialog.
 
-Here are screenshots of the console in Maya and Nuke:
+Here are some screenshots of the console running in various Shotgun engines:
 
 ### Maya
 
@@ -23,6 +23,14 @@ Here are screenshots of the console in Maya and Nuke:
 <a href="https://raw.githubusercontent.com/josh-t/tk-multi-pythonconsole/master/docs/images/screen_nuke.png">
     <img src="https://raw.githubusercontent.com/josh-t/tk-multi-pythonconsole/master/docs/images/screen_nuke.png" width="500px">
 </a>
+
+### RV
+
+... coming soon
+
+### 3ds Max
+
+... coming soon
 
 ## Features
 
