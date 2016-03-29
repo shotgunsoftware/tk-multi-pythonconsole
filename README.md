@@ -14,11 +14,11 @@ Here are screenshots of the console in Maya and Nuke:
 
 ### Maya
 
-
+![Shotgun Python Console in Maya](https://github.com/josh-t/tk-multi-pythonconsole/blob/master/docs/images/screen_maya.png =500x)
 
 ### Nuke
 
-
+![Shotgun Python Console in Nuke](https://github.com/josh-t/tk-multi-pythonconsole/blob/master/docs/images/screen_nuke.png =500x)
 
 ## Features
 
