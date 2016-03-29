@@ -32,7 +32,7 @@ class PythonConsoleApp(Application):
 
         # also register a menu entry on the shotgun menu so that users
         # can launch the panel
-        self.engine.register_command("Python Console...",
+        self.engine.register_command("Shotgun Python Console...",
                                      self.create_panel,
                                      {"type": "panel",
                                       "short_name": "python_console"})
@@ -48,7 +48,7 @@ class PythonConsoleApp(Application):
         """
         app_payload = self.import_module("app")
         widget = self.engine.show_dialog("Python Console", self,
-            app_payload.console.PythonConsoleWidget)
+            app_payload.console.ShotgunPythonConsoleWidget)
         self._current_dialog = widget
         return widget
 
@@ -64,8 +64,12 @@ class PythonConsoleApp(Application):
 
         # start the UI
         try:
-            widget = self.engine.show_panel(self._unique_panel_id,
-                "Python Console", self, app_payload.console.PythonConsoleWidget)
+            widget = self.engine.show_panel(
+                self._unique_panel_id,
+                "Shotgun Python Console",
+                self,
+                app_payload.console.ShotgunPythonConsoleWidget
+            )
         except AttributeError, e:
             # just to gracefully handle older engines and older cores
             self.log_warning("Could not execute show_panel method - please upgrade "

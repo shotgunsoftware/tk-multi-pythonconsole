@@ -37,6 +37,8 @@ import sys
 from threading import Lock
 import traceback
 
+from sgtk.errors import TankError
+from sgtk.platform.engine import current_engine
 from sgtk.platform.qt import QtCore, QtGui
 
 # make sure the images are imported for access to the resources
@@ -882,6 +884,38 @@ class PythonConsoleWidget(QtGui.QWidget):
 
         self._in_save_btn.setEnabled(script_len > 0)
         self._in_exec_btn.setEnabled(script_len > 0)
+
+class ShotgunPythonConsoleWidget(PythonConsoleWidget):
+    """A dockable, interactive python console widget.
+
+    Exposes Shotgun-specific globals by default in the editor. Similar to the
+    tk-shell engine.
+
+    - A tk API handle is available via the `tk` variable
+    - A Shotgun API handle is available via the `shotgun` variable
+    - The current context is stored in the `context` variable
+    - The shell engine can be accessed via the `engine` variable
+
+    """
+
+    def __init__(self, parent=None):
+        super(ShotgunPythonConsoleWidget, self).__init__(parent)
+
+
+        engine = current_engine()
+
+        # if not running in an engine, then we're hosed
+        if not engine:
+            raise TankError(
+                "Unable to initialize ShotgunPythonConsole. No engine running")
+
+        # add some Shotgun-specific globals
+        global_vars = globals()
+        global_vars["tk"] = engine.tank
+        global_vars["shotgun"] = engine.shotgun
+        global_vars["context"] = engine.context
+        global_vars["engine"] = engine
+
 
 def _colorize(c1, c1_strength, c2, c2_strength):
     """Convenience method for making a color from 2 existing colors.
