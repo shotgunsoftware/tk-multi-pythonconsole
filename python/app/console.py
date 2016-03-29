@@ -53,6 +53,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         super(OutputStreamWidget, self).__init__(parent)
 
         self.setReadOnly(True)
+        self.setWordWrapMode(QtGui.QTextOption.NoWrap)
 
         fixed_width_font = QtGui.QFont("Monospace")
         fixed_width_font.setStyleHint(
@@ -64,25 +65,28 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         # lock to prevent multiple threads writing output at the same time
         self._write_lock = Lock()
 
-    def add_input(self, text):
+    def add_input(self, text, prefix=">>>"):
         """
         Append the supplied input text to the contents.
 
         The text is formatted and colored to make it obvious that it is input.
 
         :param text: The input text to display.
+        :param prefix: Prefix each line of input with this string.
 
         """
 
         text = str(text)
-        formatted_lines = []
 
-        for line in text.split(os.linesep):
-            line = ">>> %s" % (line,)
-            formatted_lines.append(line)
+        if prefix:
+            formatted_lines = []
 
-        text = os.linesep.join(formatted_lines)
-        text += "\n"
+            for line in text.split(os.linesep):
+                line = "%s %s" % (prefix, line)
+                formatted_lines.append(line)
+
+            text = os.linesep.join(formatted_lines)
+            text += "\n"
 
         with self._write_lock:
             text = self._to_html(text, self._input_text_color())
@@ -902,7 +906,6 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
     def __init__(self, parent=None):
         super(ShotgunPythonConsoleWidget, self).__init__(parent)
 
-
         engine = current_engine()
 
         # if not running in an engine, then we're hosed
@@ -917,6 +920,18 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         global_vars["context"] = engine.context
         global_vars["engine"] = engine
 
+        # add a welcome message to the output widget
+        welcome_message = (
+            "Welcome to the Shotgun Python Console!\n\n"
+            "Python %s\n\n"
+            "- A tk API handle is available via the 'tk' variable\n"
+            "- A Shotgun API handle is available via the 'shotgun' variable\n"
+            "- Your current context is stored in the 'context variable\n"
+            "- The shell engine can be accessed via the 'engine' variable\n\n"
+            % (sys.version,)
+        )
+
+        self._output_widget.add_input(welcome_message, prefix=None)
 
 def _colorize(c1, c1_strength, c2, c2_strength):
     """Convenience method for making a color from 2 existing colors.
