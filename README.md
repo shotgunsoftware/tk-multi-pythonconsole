@@ -65,3 +65,6 @@ To install it, simply run:
 - For general information and documentation on Shotgun Toolkit, click here: https://support.shotgunsoftware.com/entries/95441257
 - For information about Shotgun in general, click here: http://www.shotgunsoftware.com/toolkit
 
+## Attribution
+
+This app is based on the **awesome** work of Mike Kessler: https://github.com/mikepkes/pyqtterm
