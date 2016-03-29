@@ -519,6 +519,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         # prompt to continue if there is existing code in the input widget.
         cur_python = str(self.toPlainText()).strip()
+
         if cur_python:
             btn_clicked = QtGui.QMessageBox.question(
                 self,
@@ -549,7 +550,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         fh = open(path)
         try:
             self.clear()
-            python_script = os.pathsep.join(fh.readlines())
+            python_script = "".join(fh.readlines())
             self.setPlainText(python_script)
         finally:
             fh.close()
