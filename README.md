@@ -24,10 +24,6 @@ Here are some screenshots of the console running in various Shotgun engines:
     <img src="https://raw.githubusercontent.com/josh-t/tk-multi-pythonconsole/master/docs/images/screen_nuke.png" width="500px">
 </a>
 
-### RV
-
-... coming soon
-
 ### 3ds Max
 
 ... coming soon
