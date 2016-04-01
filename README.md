@@ -12,21 +12,13 @@ be shown as a regular Toolkit dialog.
 
 Here are some screenshots of the console running in various Shotgun engines:
 
-### Maya
+### Photoshop
 
-<a href="https://raw.githubusercontent.com/josh-t/tk-multi-pythonconsole/master/docs/images/screen_maya.png"">
-    <img src="https://raw.githubusercontent.com/josh-t/tk-multi-pythonconsole/master/docs/images/screen_maya.png" width="500px">
+<a href="https://raw.githubusercontent.com/josh-t/tk-multi-pythonconsole/master/docs/images/screen_ps.png">
+    <img src="https://raw.githubusercontent.com/josh-t/tk-multi-pythonconsole/master/docs/images/screen_ps.png" width="800px">
 </a>
 
-### Nuke
-
-<a href="https://raw.githubusercontent.com/josh-t/tk-multi-pythonconsole/master/docs/images/screen_nuke.png">
-    <img src="https://raw.githubusercontent.com/josh-t/tk-multi-pythonconsole/master/docs/images/screen_nuke.png" width="500px">
-</a>
-
-### 3ds Max
-
-... coming soon
+... More coming soon
 
 ## Features
 
