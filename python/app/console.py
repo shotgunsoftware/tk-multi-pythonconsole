@@ -30,6 +30,7 @@ from __future__ import with_statement
 
 import __builtin__
 import cgi
+from contextlib import nested
 import keyword as py_keywords
 import math
 import os
@@ -43,6 +44,7 @@ from sgtk.platform.qt import QtCore, QtGui
 
 # make sure the images are imported for access to the resources
 from .ui import resources_rc
+
 
 class OutputStreamWidget(QtGui.QTextBrowser):
     """A widget to display input, output, and errors."""
@@ -87,6 +89,40 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
             text = os.linesep.join(formatted_lines)
             text += "\n"
+
+        with self._write_lock:
+            text = self._to_html(text, self._input_text_color())
+            self.moveCursor(QtGui.QTextCursor.End)
+            self.insertHtml(text)
+            self._scroll_to_bottom()
+
+    def add_results(self, text, header="# Results:", prefix="# "):
+        """
+        Append results to the contents.
+
+        The text is formatted similarly to the input. There's a prefix
+        available for each line as well as a header to identify the text as
+        results.
+
+        :param text: The results text to display.
+        :param header: A header to display in the widget to identify as results.
+        :param prefix: Prefix the results will have.
+        :return:
+        """
+
+        text = str(text)
+
+        if prefix:
+            formatted_lines = []
+
+            for line in text.split(os.linesep):
+                line = "%s %s" % (prefix, line)
+                formatted_lines.append(line)
+
+            text = os.linesep.join(formatted_lines)
+            text += "\n"
+
+        text = "%s\n%s" % (header, text)
 
         with self._write_lock:
             text = self._to_html(text, self._input_text_color())
@@ -284,6 +320,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
     # signals.
     input = QtCore.Signal(str)
     output = QtCore.Signal(str)
+    results = QtCore.Signal(str)
     error = QtCore.Signal(str)
 
     def __init__(self, echo=False, parent=None):
@@ -326,6 +363,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # these are used to redirect stdout/stderr to the signals
         self._stdout_redirect = _StdoutRedirector()
         self._stderr_redirect = _StderrRedirector()
+        self._stdin_redirect = _StdinRedirector(self._readline)
 
         self._syntax_highlighter = PythonSyntaxHighlighter(self.palette(), self)
         self._syntax_highlighter.setDocument(self.document())
@@ -339,7 +377,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # redirect any stdout to the output signal
         self._stdout_redirect.output.connect(self.output.emit)
 
-        # redirect any stderr to the output signal
+        # redirect any stderr to the error signal
         self._stderr_redirect.error.connect(self.error.emit)
 
         # make sure the current line is always highlighted
@@ -361,25 +399,39 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """Execute the contents of the input widget."""
 
         python_script = self.toPlainText().strip()
+        num_lines = len(os.linesep.split(python_script))
 
         if self._echo:
             # forward the input text
             self.input.emit(python_script)
 
-        try:
-            # try to compile the python
-            python_code = compile(python_script, '<python input>', 'exec')
-        except (SyntaxError) as e:
-            # oops, syntax error. write to our stderr
-            with self._stderr_redirect as stderr:
-                stderr.write(self._format_exc())
-            return
+        # start by assuming the code is an expression
+        eval_code = True
 
-        # exec the python code, redirecting any stdout to the ouptut signal
-        with self._stdout_redirect:
+        try:
+            # try to compile the python as an expression
+            python_code = compile(python_script, "<python input>", "eval")
+        except SyntaxError, e:
+            # not an expression. must exec
+            eval_code = False
+            try:
+                python_code = compile(python_script, "python input", "exec")
+            except SyntaxError, e:
+                # oops, syntax error. write to our stderr
+                with self._stderr_redirect as stderr:
+                    stderr.write(self._format_exc())
+                return
+
+        # exec the python code, redirecting any stdout to the ouptut signal.
+        # also redirect stdin if need be
+        with nested(self._stdout_redirect, self._stdin_redirect):
             try:
                 # use our copy of locals to allow persistence between executions
-                exec(python_code, globals(), self._locals)
+                if eval_code:
+                    results = eval(python_code, globals(), self._locals)
+                    self.results.emit(str(results))
+                else:
+                    exec(python_code, globals(), self._locals)
             except StandardError:
                 # oops, error encountered. write/redirect to the error signal
                 with self._stderr_redirect as stderr:
@@ -478,6 +530,37 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             )
 
         return self._line_num_base_color
+
+    def _readline(self):
+        """
+        Reads a line of input text from the user.
+
+        :return: a string for the user input.
+        """
+
+        dialog = QtGui.QInputDialog(flags=QtCore.Qt.FramelessWindowHint)
+        dialog.setLabelText("Python is requesting input")
+        dialog.adjustSize()
+
+        parent_pos = self.mapToGlobal(self.pos())
+
+        dialog.resize(self.width() - 2, dialog.height())
+        dialog.move(
+            parent_pos.x() + (self.width() / 2.0) - (dialog.width() / 2.0),
+            parent_pos.y() + self.height() - dialog.height() - 1
+        )
+
+        self.setEnabled(False)
+
+        try:
+            if dialog.exec_() == QtGui.QDialog.Accepted:
+                return str(dialog.textValue()) + "\n"
+            else:
+                return ""
+        finally:
+            self.setFocus()
+            self.setEnabled(True)
+
 
     def line_number_area_width(self):
         """Calculate the width of the line number area."""
@@ -581,7 +664,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         fh = open(str(save_path_data[0]), "w")
         try:
             fh.write(python_script)
-        except Exception as e:
+        except Exception, e:
             QtGui.QMessageBox.warning(
                 self,
                 "Failed to Save Python Script",
@@ -655,6 +738,42 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             )
 
         return self._cur_line_color
+
+class _StdinRedirector(QtCore.QObject):
+    """Handles redirecting stdin.
+
+    Sends an input signal when stdin is read from.
+    """
+
+    input_requested = QtCore.Signal(str)
+
+    def __init__(self, readline_callback, parent=None):
+        """Initialize the redirection object.
+
+        :param parent: The parent qt object.
+        """
+        super(_StdinRedirector, self).__init__(parent)
+        self._handle = None
+        self._readline_callback = readline_callback
+
+    def __enter__(self):
+        """Begin rediredtion.
+
+        Temporarily assigns stdin to this object for writing.
+        """
+        self._handle = sys.stdin
+        sys.stdin = self
+        return self
+
+    def __exit__(self, type, value, traceback):
+        """Finish redirection.
+
+        Repoint sys.stdin to the original handle.
+        """
+        sys.stdin = self._handle
+
+    def readline(self):
+        return self._readline_callback()
 
 
 class _StdoutRedirector(QtCore.QObject):
@@ -872,6 +991,7 @@ class PythonConsoleWidget(QtGui.QWidget):
         self._python_input_widget.input.connect(self._output_widget.add_input)
         self._python_input_widget.output.connect(self._output_widget.add_output)
         self._python_input_widget.error.connect(self._output_widget.add_error)
+        self._python_input_widget.results.connect(self._output_widget.add_results)
 
         self._python_input_widget.textChanged.connect(self._check_button_state)
 
@@ -926,7 +1046,7 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
             "Python %s\n\n"
             "- A tk API handle is available via the 'tk' variable\n"
             "- A Shotgun API handle is available via the 'shotgun' variable\n"
-            "- Your current context is stored in the 'context variable\n"
+            "- Your current context is stored in the 'context' variable\n"
             "- The shell engine can be accessed via the 'engine' variable\n\n"
             % (sys.version,)
         )
