@@ -1,7 +1,7 @@
 
 ## Shotgun Python Console
 
-This is a python console panel for use in DCCs with an embeded python interpreter
+This is a python console panel for use in DCCs with access to a python interpreter
 that have limited or no support for interacting with said interpreter.
 
 Once installed, the console is registered as a panel in the DCC and is available
