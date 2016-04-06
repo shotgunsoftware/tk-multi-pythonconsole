@@ -21,8 +21,8 @@ supported_engines:
 requires_shotgun_fields:
         
 # More verbose description of this item 
-display_name: "Python Console"
-description: "A python console for working with python inside a Toolkit engine."
+display_name: "Shotgun Python Console"
+description: "A Python console for Shotgun Toolkit"
 
 # Required minimum versions for this item to run
 requires_shotgun_version: "v6.2.0"
