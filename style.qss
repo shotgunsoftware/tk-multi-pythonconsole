@@ -10,9 +10,106 @@ For more info about QT stylesheets, please see http://doc.qt.io/qt-4.8/styleshee
 
 ********************************************************************************************/
 
+/****************************************************************/
 
+QTextEdit {
+    font-family: "Courier";
+}
+
+QPlainTextEdit {
+    font-family: "Courier";
+}
+
+/****************************************************************/
+/* Main tab section                                             */
+
+QTabWidget::pane {
+    border-bottom : 1px solid rgb(255, 255, 255, 20);
+    padding-bottom: 2px;
+}
+
+/* Style the tab using the tab sub-control.
+   Note that it reads QTabBar _not_ QTabWidget */
+QTabBar::tab {
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 4px;
+    padding-bottom: 2px;
+    border-top: 2px solid rgb(255, 255, 255, 5);
+}
+
+QTabBar::tab:hover {
+    color: {{SG_HIGHLIGHT_COLOR}};
+}
+
+QTabBar::tab:selected {
+    color: {{SG_HIGHLIGHT_COLOR}};
+    border-top: 2px solid {{SG_HIGHLIGHT_COLOR}};
+}
+
+QTabBar::close-button {
+    image: url(:/tk_multi_pythonconsole/close_disabled.png);
+    width: 12px;
+    height: 12px;
+    padding-top: 6px;
+}
+QTabBar::close-button:hover {
+    image: url(:/tk_multi_pythonconsole/close.png);
+}
+
+QTabBar::scroller {
+    height: 22px;
+    width: 22px;
+}
+
+QTabBar QToolButton {
+    border: none;
+    background-color: palette(window);
+}
+
+QTabBar QToolButton::left-arrow {
+    image: url(:/tk_multi_pythonconsole/left_arrow_pressed.png);
+}
+
+QTabBar QToolButton::left-arrow:hover {
+    image: url(:/tk_multi_pythonconsole/left_arrow_hover.png);
+}
+
+QTabBar QToolButton::left-arrow:disabled {
+    image: url(:/tk_multi_pythonconsole/left_arrow_disabled.png);
+}
+
+QTabBar QToolButton::left-arrow:pressed {
+    image: url(:/tk_multi_pythonconsole/left_arrow_pressed.png);
+}
+
+QTabBar QToolButton::right-arrow {
+    image: url(:/tk_multi_pythonconsole/right_arrow_pressed.png);
+}
+
+QTabBar QToolButton::right-arrow:hover {
+    image: url(:/tk_multi_pythonconsole/right_arrow_hover.png);
+}
+
+QTabBar QToolButton::right-arrow:disabled {
+    image: url(:/tk_multi_pythonconsole/right_arrow_disabled.png);
+}
+
+QTabBar QToolButton::right-arrow:pressed {
+    image: url(:/tk_multi_pythonconsole/right_arrow_pressed.png);
+}
+
+/****************************************************************/
 /* Get rid of borders for main Listing Views */
 QScrollArea {
+    border: none;
+}
+
+QTextBrowser {
+    border: none;
+}
+
+QPlainTextEdit {
     border: none;
 }
 
@@ -33,7 +130,7 @@ QToolButton:hover#out_clear_btn {
     background-image: url(:/tk_multi_pythonconsole/clear_hover.png);
 }
 
-QToolButton:Pressed#out_clear_btn {
+QToolButton:pressed#out_clear_btn {
     background-image: url(:/tk_multi_pythonconsole/clear_pressed.png);
 }
 
@@ -54,12 +151,37 @@ QToolButton:hover#out_echo_btn {
     background-image: url(:/tk_multi_pythonconsole/echo_hover.png);
 }
 
-QToolButton:Pressed#out_echo_btn {
+QToolButton:pressed#out_echo_btn {
     background-image: url(:/tk_multi_pythonconsole/echo_pressed.png);
 }
 
 QToolButton#out_echo_btn:checked {
     background-image: url(:/tk_multi_pythonconsole/echo_pressed.png);
+}
+
+/* Line Numbers on/off */
+QToolButton#line_num_btn {
+    border: none;
+    background-color: none;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(:/tk_multi_pythonconsole/line_num.png);
+}
+
+QToolButton:disabled#line_num_btn {
+    background-image: url(:/tk_multi_pythonconsole/line_num_disabled.png);
+}
+
+QToolButton:hover#line_num_btn {
+    background-image: url(:/tk_multi_pythonconsole/line_num_hover.png);
+}
+
+QToolButton:pressed#line_num_btn {
+    background-image: url(:/tk_multi_pythonconsole/line_num_pressed.png);
+}
+
+QToolButton#line_num_btn:checked {
+    background-image: url(:/tk_multi_pythonconsole/line_num_pressed.png);
 }
 
 /* Input Clear Button*/
@@ -79,7 +201,7 @@ QToolButton:hover#in_clear_btn {
     background-image: url(:/tk_multi_pythonconsole/clear_hover.png);
 }
 
-QToolButton:Pressed#in_clear_btn {
+QToolButton:pressed#in_clear_btn {
     background-image: url(:/tk_multi_pythonconsole/clear_pressed.png);
 }
 
@@ -89,19 +211,23 @@ QToolButton#in_open_btn {
     background-color: none;
     background-repeat: no-repeat;
     background-position: center center;
-    background-image: url(:/tk_multi_pythonconsole/open.png);
+    background-image: url(:/tk_multi_pythonconsole/open_menu.png);
+}
+
+QToolButton::menu-indicator#in_open_btn {
+    image: none;
 }
 
 QToolButton:disabled#in_open_btn {
-    background-image: url(:/tk_multi_pythonconsole/open_disabled.png);
+    background-image: url(:/tk_multi_pythonconsole/open_menu_disabled.png);
 }
 
 QToolButton:hover#in_open_btn {
-    background-image: url(:/tk_multi_pythonconsole/open_hover.png);
+    background-image: url(:/tk_multi_pythonconsole/open_menu_hover.png);
 }
 
-QToolButton:Pressed#in_open_btn {
-    background-image: url(:/tk_multi_pythonconsole/open_pressed.png);
+QToolButton:pressed#in_open_btn {
+    background-image: url(:/tk_multi_pythonconsole/open_menu_pressed.png);
 }
 
 /* Input Save Button*/
@@ -121,7 +247,7 @@ QToolButton:hover#in_save_btn {
     background-image: url(:/tk_multi_pythonconsole/save_hover.png);
 }
 
-QToolButton:Pressed#in_save_btn {
+QToolButton:pressed#in_save_btn {
     background-image: url(:/tk_multi_pythonconsole/save_pressed.png);
 }
 
@@ -142,6 +268,21 @@ QToolButton:hover#in_exec_btn {
     background-image: url(:/tk_multi_pythonconsole/execute_hover.png);
 }
 
-QToolButton:Pressed#in_exec_btn {
+QToolButton:pressed#in_exec_btn {
     background-image: url(:/tk_multi_pythonconsole/execute_pressed.png);
 }
+
+/* Add Tab button*/
+QToolButton#add_tab_btn {
+    border: none;
+    background-color: none;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(:/tk_multi_pythonconsole/add_disabled.png);
+}
+
+QToolButton:hover#add_tab_btn {
+    background-image: url(:/tk_multi_pythonconsole/add.png);
+}
+
+

@@ -1,9 +1,17 @@
 <RCC>
   <qresource prefix="tk_multi_pythonconsole">
+    <file>add.png</file>
+    <file>add_disabled.png</file>
+    <file>add_hover.png</file>
+    <file>add_pressed.png</file>
     <file>clear.png</file>
     <file>clear_disabled.png</file>
     <file>clear_hover.png</file>
     <file>clear_pressed.png</file>
+    <file>close.png</file>
+    <file>close_disabled.png</file>
+    <file>close_hover.png</file>
+    <file>close_pressed.png</file>
     <file>echo.png</file>
     <file>echo_disabled.png</file>
     <file>echo_hover.png</file>
@@ -12,10 +20,27 @@
     <file>execute_disabled.png</file>
     <file>execute_hover.png</file>
     <file>execute_pressed.png</file>
+    <file>github.png</file>
+    <file>left_arrow.png</file>
+    <file>left_arrow_disabled.png</file>
+    <file>left_arrow_hover.png</file>
+    <file>left_arrow_pressed.png</file>
+    <file>line_num.png</file>
+    <file>line_num_disabled.png</file>
+    <file>line_num_hover.png</file>
+    <file>line_num_pressed.png</file>
     <file>open.png</file>
     <file>open_disabled.png</file>
     <file>open_hover.png</file>
     <file>open_pressed.png</file>
+    <file>open_menu.png</file>
+    <file>open_menu_disabled.png</file>
+    <file>open_menu_hover.png</file>
+    <file>open_menu_pressed.png</file>
+    <file>right_arrow.png</file>
+    <file>right_arrow_disabled.png</file>
+    <file>right_arrow_hover.png</file>
+    <file>right_arrow_pressed.png</file>
     <file>save.png</file>
     <file>save_disabled.png</file>
     <file>save_hover.png</file>

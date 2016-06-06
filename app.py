@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Shotgun Software Inc.
+# Copyright (c) 2016 Shotgun Software Inc.
 # 
 # CONFIDENTIAL AND PROPRIETARY
 # 
@@ -8,11 +8,31 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-
+import sgtk
 from sgtk.platform import Application
+
 
 class PythonConsoleApp(Application):
     """A python console dialog/panel"""
+
+    def add_tab(self, name=None, contents=None, icon=None, description=None):
+        """
+        Add a new tab.
+
+        :param name: The name of the new tab or ``None``
+        :param contents: The contents of the new tab's input or ``None``.
+        :param icon: The icon to use for the new tab or ``None``.
+        :param description: A description of the tab/contents.
+
+        :return: The index of the new tab.
+        """
+
+        widget = self._current_panel or self._current_dialog
+
+        if widget:
+            widget.tabs.add_tab(name, contents, icon, description)
+        else:
+            raise sgtk.TankError("There is no current panel or dialog to add a tab to.")
     
     def init_app(self):
         """
@@ -49,6 +69,7 @@ class PythonConsoleApp(Application):
         app_payload = self.import_module("app")
         widget = self.engine.show_dialog("Python Console", self,
             app_payload.console.ShotgunPythonConsoleWidget)
+        widget.setMinimumWidth(400)
         self._current_dialog = widget
         return widget
 
@@ -76,6 +97,8 @@ class PythonConsoleApp(Application):
                              "to latest core and engine! Falling back on show_dialog. "
                              "Error: %s" % e)
             widget = self.create_dialog()
+        widget.setMinimumWidth(400)
+        self._current_panel = widget
 
         return widget
 

@@ -13,6 +13,11 @@
 # expected fields in the configuration file for this engine
 configuration:
 
+  external_sources_hook:
+    type: hook
+    description: "Supplies information about external sources for new tabs."
+    default: "{self}/external_sources.py"
+
 # this app works in all engines - it does not contain 
 # any host application specific commands
 supported_engines: 
@@ -31,4 +36,4 @@ requires_engine_version:
 
 # the frameworks required to run this app
 frameworks:
-    
+    - {"name": "tk-framework-shotgunutils", "version": "v4.x.x"}
