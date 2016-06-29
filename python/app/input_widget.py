@@ -24,7 +24,15 @@ from .util import colorize
 
 
 class PythonInputWidget(QtGui.QPlainTextEdit):
-    """A simple python editor widget."""
+    """A simple python editor widget.
+
+    :signal: ``input(str)`` - emits the input input text when submitted
+    :signal: ``output(str)`` - emits the output when eval'd/exec'd
+    :signal: ``results(str)`` - emits the returned results as a ``str`` after eval/exec
+    :signal: ``error(str)`` - emits any error as a ``str`` after eval/exec
+    :signal: ``cursor_column_changed(int)`` - emits the current column as the cursor changes
+
+    """
 
     # signals.
     input = QtCore.Signal(str)

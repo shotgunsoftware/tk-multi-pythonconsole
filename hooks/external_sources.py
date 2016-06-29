@@ -17,9 +17,12 @@ from sgtk.platform.qt import QtGui
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
-# TODO: create an sgtk account with gists of useful snippets?
-# github gist users to load content for
-GITHUB_GIST_USERS = ["gvanrossum", "josh-t", "manneohrstrom", "robblau"]
+# Note: for this hook to work, a valid env variable called GITHUB_OAUTH_TOKEN
+# must be defined with a valid oauth token as a value. A list of github user
+# names should be added below
+
+# add a list of github user names here
+GITHUB_GIST_USERS = []
 
 # github API url
 PUBLIC_GISTS_QUERY_URL = "https://api.github.com/users/%s/gists?access_token=%s"
@@ -30,6 +33,8 @@ QUERIED_GISTS = {}
 class ExternalSources(HookBaseClass):
     """
     Methods that define external sources for python console tabs.
+
+    An example for loading github gists is included.
     """
 
     def get_external_source_actions(self, parent_obj):
@@ -43,6 +48,9 @@ class ExternalSources(HookBaseClass):
         A parent ``QObject`` is supplied for creating the actions so that they
         do not go out of scope.
 
+        :param parent_obj: The ``QtCore.QObject`` the returned actions should be parented under
+
+        :returns: A list of ``QActions``
         """
 
         return [
@@ -55,9 +63,12 @@ class ExternalSources(HookBaseClass):
 
         The returned action is a menu action showing actions for each gist
         for the users defined in ``GITHUB_GIST_USERS``.
+
+        :param parent: The ``QtGui.QObject`` to use as the action's parent
         """
 
         app = self.parent
+
         gists_menu = QtGui.QMenu("Gists", parent)
 
         icon = QtGui.QIcon(":/tk_multi_pythonconsole/github.png")
@@ -67,7 +78,7 @@ class ExternalSources(HookBaseClass):
 
             if not gist_user in QUERIED_GISTS:
                 # query gists for this user
-                QUERIED_GISTS[gist_user] = get_gists(gist_user)
+                QUERIED_GISTS[gist_user] = get_gists(gist_user, app)
 
             gists = QUERIED_GISTS[gist_user]
 
@@ -90,7 +101,7 @@ class ExternalSources(HookBaseClass):
         """
         Adds a new tab for the supplied gist.
 
-        :param gist:
+        :param gist: A dictionary with information about a gist
         """
 
         name = gist["file_name"]
@@ -103,13 +114,19 @@ class ExternalSources(HookBaseClass):
         github_icon = QtGui.QIcon(":/tk_multi_pythonconsole/github.png")
 
         app = self.parent
-        app.add_tab(name, contents, icon=github_icon, description=gist["description"])
+        app.add_tab(name, contents, icon=github_icon)
 
 
-def get_gists(username):
-    """Returns a list of dicts with gist info for a supplied github username."""
+def get_gists(username, app):
+    """
+    Returns a list of dicts with gist info for a supplied github username.
+
+    :param username: The github username to get gists for.
+
+    """
 
     if not "GITHUB_OAUTH_TOKEN" in os.environ:
+        app.log_debug("No github oauth token found in env.")
         return []
 
     url = PUBLIC_GISTS_QUERY_URL % (username, os.environ["GITHUB_OAUTH_TOKEN"])
@@ -135,11 +152,12 @@ def get_gists(username):
 
         # only return gists with 1 file (don't know how to handle more yet)
         if len(file_data.keys()) != 1:
+            app.log_debug("Found gist with multiple files. Don't know how to handle that yet.")
             continue
 
         file_info = file_data[file_data.keys()[0]]
 
-        file_url = str(file_info.get("raw_url"))
+        file_url = file_info.get("raw_url")
         if not file_url:
             continue
 
@@ -149,7 +167,7 @@ def get_gists(username):
         gists.append(
             {
                 "file_name": str(file_info.get("filename", "gist")),
-                "file_url": file_url,
+                "file_url": str(file_url),
                 "description": description,
                 "language": str(file_info.get("language", "unknown")),
                 "author": gist_data.get("owner", {}).get("login"),

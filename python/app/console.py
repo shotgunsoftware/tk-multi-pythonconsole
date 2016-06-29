@@ -413,7 +413,7 @@ class PythonTabWidget(QtGui.QTabWidget):
         # watch for double click events on the tabbar
         self.tabBar().installEventFilter(self)
 
-    def add_tab(self, name=None, contents=None, icon=None, description=None):
+    def add_tab(self, name=None, contents=None, icon=None):
         """
         Add a new tab.
 
@@ -425,15 +425,13 @@ class PythonTabWidget(QtGui.QTabWidget):
         """
 
         # if no contents supplied, add a timestamped comment to the input
-        if not contents:
-            contents = ""
+        contents = contents or ""
 
         # splitter
         widget = _PythonConsoleSplitter(QtCore.Qt.Vertical, self)
         widget.input_widget.setPlainText(contents)
 
-        if not name:
-            name = ".py"
+        name = name or ".py"
 
         # add the tab
         if icon:
@@ -574,8 +572,7 @@ class _PythonConsoleSplitter(QtGui.QSplitter):
         Initialize the splitter.
 
         :param orientation: Splitter orientation
-        :param parent:
-        :return:
+        :param parent: The parent ``QtGui.QWidget``
         """
 
         super(_PythonConsoleSplitter, self).__init__(orientation, parent)
