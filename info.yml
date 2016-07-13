@@ -16,7 +16,7 @@ configuration:
   external_sources_hook:
     type: hook
     description: "Supplies information about external sources for new tabs."
-    default: "{self}/external_sources.py"
+    default_value: "{self}/external_sources.py"
 
 # this app works in all engines - it does not contain 
 # any host application specific commands
