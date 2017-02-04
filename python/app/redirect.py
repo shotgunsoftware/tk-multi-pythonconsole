@@ -89,7 +89,11 @@ class StdoutRedirector(QtCore.QObject):
 
         If tee, then also write to stdout.
         """
+        if isinstance(msg, unicode):
+            msg = unicode.encode(msg, "utf-8")
+
         self.output.emit(msg)
+
         if self._tee and self._handle:
             self._handle.write(msg)
 
@@ -132,6 +136,10 @@ class StderrRedirector(QtCore.QObject):
 
         If tee, then also write to stderr.
         """
+        if isinstance(msg, unicode):
+            msg = unicode.encode(msg, "utf-8")
+
         self.error.emit(msg)
+
         if self._tee:
             self._handle.write(msg)
