@@ -194,24 +194,39 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
         return super(OutputStreamWidget, self).wheelEvent(event)
 
-    def zoom_in(self, range=1):
+    def zoom(self, direction):
         """
-        Handles zooming in on output text.
+        Zoom in on the text.
         """
 
         font = self.font()
-        new_size = font.pointSize() + range
-        if new_size < 7:
-            new_size = 7
-        elif new_size >= 50:
+        size = font.pointSize()
+        if size == -1:
+            size = font.pixelSize()
+
+        size += direction
+
+        if size < 7:
+            size = 7
+        if size > 50:
             return
 
-        font.setPointSize(new_size)
-        self.setFont(font)
+        style = """
+        QWidget {
+            font-size: %spt;
+        }
+        """ % (size,)
+        self.setStyleSheet(style)
 
-    def zoom_out(self, range=1):
+    def zoom_in(self):
         """
-        Handles zooming out on output text.
+        Zoom in on the text.
         """
-        self.zoom_in(-1 * range)
+        self.zoom(1)
+
+    def zoom_out(self):
+        """
+        Zoom out on the text.
+        """
+        self.zoom(-1)
 

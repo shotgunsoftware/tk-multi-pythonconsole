@@ -96,7 +96,6 @@ class PythonConsoleApp(sgtk.platform.Application):
                              "to latest core and engine! Falling back on show_dialog. "
                              "Error: %s" % e)
             widget = self.create_dialog()
-        widget.setMinimumWidth(400)
         self._current_panel = widget
 
         return widget
