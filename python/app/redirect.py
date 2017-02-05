@@ -84,6 +84,11 @@ class StdoutRedirector(QtCore.QObject):
         """
         sys.stdout = self._handle
 
+    def flush(self):
+        """Nothing to emit for the redirector. Flush the original if tee'ing."""
+        if self._tee:
+            self._handle.flush()
+
     def write(self, msg):
         """Forward the written output to the output signal.
 
@@ -130,6 +135,11 @@ class StderrRedirector(QtCore.QObject):
         Repoint sys.stderr to the original handle.
         """
         sys.stderr = self._handle
+
+    def flush(self):
+        """Nothing to emit for the redirector. Flush the original if tee'ing."""
+        if self._tee:
+            self._handle.flush()
 
     def write(self, msg):
         """Forward the written output to the error signal.
