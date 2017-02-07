@@ -296,7 +296,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """
 
         save_dialog = QtGui.QFileDialog(
-            parent=self,
             caption="Save Python Script",
             directory=start_path,
             filter="*.py",
@@ -464,7 +463,10 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         :return: a string for the user input.
         """
-        dialog = QtGui.QInputDialog(flags=QtCore.Qt.FramelessWindowHint)
+        dialog = QtGui.QInputDialog(
+            parent=self,
+            flags=QtCore.Qt.FramelessWindowHint
+        )
         dialog.setLabelText("Python is requesting input")
         dialog.adjustSize()
 
@@ -473,7 +475,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             self.mapToGlobal(self.rect().topLeft()).x(),
             self.mapToGlobal(self.rect().bottomLeft()).y() - dialog.height()
         )
-        self.setEnabled(False)
 
         try:
             if dialog.exec_() == QtGui.QDialog.Accepted:
@@ -482,7 +483,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                 return ""
         finally:
             self.setFocus()
-            self.setEnabled(True)
 
     def _update_line_number_area(self, rect, dy):
         """Update the contents of the line number area.

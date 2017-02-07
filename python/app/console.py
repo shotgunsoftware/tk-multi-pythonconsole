@@ -208,7 +208,6 @@ class PythonConsoleWidget(QtGui.QWidget):
         # browse to a file to open
         if not path or os.path.isdir(path):
             open_dialog = QtGui.QFileDialog(
-                parent=self,
                 caption="Open Python Script",
                 directory=path,
                 filter="*.py",
@@ -548,7 +547,10 @@ class PythonTabWidget(QtGui.QTabWidget):
         Shows a dialog prompt for tab renaming.
         """
 
-        dialog = QtGui.QInputDialog(flags=QtCore.Qt.FramelessWindowHint)
+        dialog = QtGui.QInputDialog(
+            parent=self,
+            flags=QtCore.Qt.FramelessWindowHint
+        )
         dialog.setLabelText("New Tab Name:")
         dialog.adjustSize()
 
