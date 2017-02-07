@@ -207,14 +207,18 @@ class PythonConsoleWidget(QtGui.QWidget):
 
         # browse to a file to open
         if not path or os.path.isdir(path):
-            open_path_data = QtGui.QFileDialog.getOpenFileName(
-                self,
-                "Open Python Script",
-                dir=path,
-                selectedFilter="*.py",
-                options=QtGui.QFileDialog.DontResolveSymlinks,
+            open_dialog = QtGui.QFileDialog(
+                parent=self,
+                caption="Open Python Script",
+                directory=path,
+                filter="*.py",
             )
-            path = str(open_path_data[0])
+            open_dialog.setFileMode(QtGui.QFileDialog.ExistingFile)
+            open_dialog.setOption(QtGui.QFileDialog.DontResolveSymlinks, True)
+            open_dialog.setOption(QtGui.QFileDialog.DontUseNativeDialog, True)
+            open_dialog.setViewMode(QtGui.QFileDialog.Detail)
+            if open_dialog.exec_():
+                path = open_dialog.selectedFiles()[0]
 
         if not path:
             return

@@ -289,26 +289,32 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         )
         self._line_number_area.setGeometry(line_number_area_rect)
 
-    def save(self, path=None):
+    def save(self, start_path=None):
         """Save the current contents to a file.
 
         :param path: A path to a file to save or dir to browse.
         """
 
-        save_path_data = QtGui.QFileDialog.getSaveFileName(
-            self,
-            "Save Python Script",
-            dir=path,
-            selectedFilter="*.py",
-            options=QtGui.QFileDialog.DontResolveSymlinks,
+        save_dialog = QtGui.QFileDialog(
+            parent=self,
+            caption="Save Python Script",
+            directory=start_path,
+            filter="*.py",
         )
+        save_dialog.setOption(QtGui.QFileDialog.DontResolveSymlinks, True)
+        save_dialog.setOption(QtGui.QFileDialog.DontUseNativeDialog, True)
+        save_dialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
+        save_dialog.setViewMode(QtGui.QFileDialog.Detail)
+        save_path = None
+        if save_dialog.exec_():
+            save_path = save_dialog.selectedFiles()[0]
 
-        if not save_path_data or not save_path_data[0]:
+        if not save_path:
             return False
 
         # write the contents of the editor to a file.
         python_script = str(self.toPlainText())
-        fh = open(str(save_path_data[0]), "w")
+        fh = open(save_path, "w")
         try:
             fh.write(python_script)
         except Exception, e:
