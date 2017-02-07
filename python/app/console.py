@@ -51,21 +51,21 @@ class PythonConsoleWidget(QtGui.QWidget):
         out_clear_btn.setToolTip("Clear all output.")
 
         # echo output
-        out_echo_btn = QtGui.QToolButton()
-        out_echo_btn.setCheckable(True)
-        out_echo_btn.setChecked(True)
-        out_echo_btn.setDown(True)
-        out_echo_btn.setMinimumSize(QtCore.QSize(30, 30))
-        out_echo_btn.setMaximumSize(QtCore.QSize(30, 30))
-        out_echo_btn.setObjectName("out_echo_btn")
-        out_echo_btn.setToolTip("Echo python commands in output.")
+        self._out_echo_btn = QtGui.QToolButton()
+        self._out_echo_btn.setCheckable(True)
+        self._out_echo_btn.setChecked(True)
+        self._out_echo_btn.setDown(True)
+        self._out_echo_btn.setMinimumSize(QtCore.QSize(30, 30))
+        self._out_echo_btn.setMaximumSize(QtCore.QSize(30, 30))
+        self._out_echo_btn.setObjectName("out_echo_btn")
+        self._out_echo_btn.setToolTip("Echo python commands in output.")
 
         # output buttons layout
         out_btn_box = QtGui.QVBoxLayout()
         out_btn_box.setContentsMargins(0, 0, 0, 0)
         out_btn_box.addWidget(out_clear_btn)
         out_btn_box.addSpacing(10)
-        out_btn_box.addWidget(out_echo_btn)
+        out_btn_box.addWidget(self._out_echo_btn)
         out_btn_box.addSpacing(10)
         out_btn_box.addStretch()
 
@@ -185,7 +185,7 @@ class PythonConsoleWidget(QtGui.QWidget):
         add_tab_btn.clicked.connect(self.tabs.add_tab)
 
         # toggles
-        out_echo_btn.toggled.connect(
+        self._out_echo_btn.toggled.connect(
             lambda t: self._cur_tab_widget().input_widget.toggle_echo(t))
 
         self._line_num_btn.toggled.connect(
@@ -264,7 +264,14 @@ class PythonConsoleWidget(QtGui.QWidget):
         self._in_exec_btn.setEnabled(script_len > 0)
 
         # see if line numbers turned on for the widget
-        self._line_num_btn.setDown(self._cur_tab_widget().input_widget.showing_line_numbers())
+        show_line_nums = self._cur_tab_widget().input_widget.showing_line_numbers()
+        self._line_num_btn.setDown(show_line_nums)
+        self._line_num_btn.setChecked(show_line_nums)
+
+        # see if echo is enabled
+        echo = self._cur_tab_widget().input_widget.echoing_output()
+        self._out_echo_btn.setDown(echo)
+        self._out_echo_btn.setChecked(echo)
 
 
 class ShotgunPythonConsoleWidget(PythonConsoleWidget):
@@ -584,8 +591,8 @@ class _PythonConsoleSplitter(QtGui.QSplitter):
         super(_PythonConsoleSplitter, self).__init__(orientation, parent)
 
         self.output_widget = OutputStreamWidget(parent=self)
-        self.input_widget = PythonInputWidget(self)
-        self.info_widget = _PythonInputInfoWidget(self)
+        self.input_widget = PythonInputWidget(parent=self)
+        self.info_widget = _PythonInputInfoWidget(parent=self)
 
         self.addWidget(self.output_widget)
 

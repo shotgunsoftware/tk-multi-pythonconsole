@@ -41,7 +41,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
     error = QtCore.Signal(str)
     cursor_column_changed = QtCore.Signal(int)
 
-    def __init__(self, echo=False, parent=None):
+    def __init__(self, parent=None):
         """Initialize the input widget.
 
         :param echo: bool, echo input if True.
@@ -52,7 +52,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         # local symbol table for this input widget.
         self._locals = {}
-        self._echo = echo
+        self._echo = True
         self._show_line_numbers = True
 
         # helps prevent unnecessary redraws of the line number area later.
@@ -326,6 +326,10 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             fh.close()
 
         return True
+
+    def echoing_output(self):
+        # returns ``True`` if echoing python commands/statements to the output window
+        return self._echo
 
     def showing_line_numbers(self):
         # returns ``True`` if line numbers are being shown, ``False`` otherwise.
