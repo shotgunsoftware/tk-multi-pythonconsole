@@ -541,8 +541,6 @@ class PythonTabWidget(QtGui.QTabWidget):
         """
 
         self.blockSignals(True)
-        widget = self.widget(index)
-        widget.deleteLater()
         self.removeTab(index)
         self.blockSignals(False)
 
