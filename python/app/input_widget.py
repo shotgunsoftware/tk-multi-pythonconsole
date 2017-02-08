@@ -296,6 +296,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """
 
         save_dialog = QtGui.QFileDialog(
+            parent=QtGui.QApplication.activeWindow(),
             caption="Save Python Script",
             directory=start_path,
             filter="*.py",

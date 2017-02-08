@@ -208,6 +208,7 @@ class PythonConsoleWidget(QtGui.QWidget):
         # browse to a file to open
         if not path or os.path.isdir(path):
             open_dialog = QtGui.QFileDialog(
+                parent=QtGui.QApplication.activeWindow(),
                 caption="Open Python Script",
                 directory=path,
                 filter="*.py",
