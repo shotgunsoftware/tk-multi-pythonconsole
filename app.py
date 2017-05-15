@@ -54,7 +54,7 @@ class PythonConsoleApp(sgtk.platform.Application):
         # can launch the panel
         self.engine.register_command("Shotgun Python Console...",
                                      self.create_panel,
-                                     {"type": "panel",
+                                     {"type": "context_menu",
                                       "short_name": "python_console"})
 
     def create_dialog(self):
