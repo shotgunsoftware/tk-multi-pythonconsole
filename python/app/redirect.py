@@ -15,7 +15,6 @@ try:
 except ImportError:
     from PySide import QtCore, QtGui
 
-
 class StdinRedirector(QtCore.QObject):
     """Handles redirecting stdin.
 

@@ -10,21 +10,11 @@
 
 from datetime import datetime
 import os
-import sys
-import urllib2
 
-import sgtk
-from sgtk.errors import TankError
-from sgtk.platform.engine import current_engine
 try:
     from sgtk.platform.qt import QtCore, QtGui
 except ImportError:
     from PySide import QtCore, QtGui
-
-try:
-    settings = sgtk.platform.import_framework("tk-framework-shotgunutils", "settings")
-except:
-    settings = None
 
 # make sure the images are imported for access to the resources
 from .ui import resources_rc
@@ -248,17 +238,6 @@ class PythonConsoleWidget(QtGui.QWidget):
         self._open_file_menu.clear()
         self._open_file_menu.addAction(self._open_file_action)
 
-        app = sgtk.platform.current_bundle()
-
-        # get a list of tuples for the external source types
-        actions = app.execute_hook_method(
-            "external_sources_hook",
-            "get_external_source_actions",
-            parent_obj=self._open_file_menu,
-        )
-
-        for action in actions:
-            self._open_file_menu.addAction(action)
 
     def _check_button_state(self):
         """
@@ -279,122 +258,6 @@ class PythonConsoleWidget(QtGui.QWidget):
         echo = self._cur_tab_widget().input_widget.echoing_output()
         self._out_echo_btn.setDown(echo)
         self._out_echo_btn.setChecked(echo)
-
-
-class ShotgunPythonConsoleWidget(PythonConsoleWidget):
-    """A dockable, interactive, Shotgun-aware python console widget.
-
-    Exposes Shotgun-specific globals by default in the editor. Similar to the
-    tk-shell engine.
-
-    - A tk API handle is available via the `tk` variable
-    - A Shotgun API handle is available via the `shotgun` variable
-    - The current context is stored in the `context` variable
-    - The shell engine can be accessed via the `engine` variable
-
-    """
-
-    def __init__(self, parent=None):
-        """
-        Initialize the console widget.
-
-        :param parent: The console's parent widget.
-        """
-
-        super(ShotgunPythonConsoleWidget, self).__init__(parent)
-
-        engine = current_engine()
-        self._settings_manager = settings.UserSettings(sgtk.platform.current_bundle()) if settings else None
-
-        # add a welcome message to the output widget
-
-        add_sg_globals = lambda i: \
-            self.tabs.widget(i).input_widget.add_globals(self._get_sg_globals())
-
-        # lambda to add the welcome message to a tab at a given index
-        add_welcome_msg = lambda i: \
-            self.tabs.widget(i).output_widget.add_input(self.welcome_message, prefix=None)
-
-        # set globals as new tabs are created
-        self.tabs.tab_added.connect(add_sg_globals)
-
-        # when a new tab is added, add the welcome message
-        self.tabs.tab_added.connect(add_welcome_msg)
-
-        # try to restore previous tabs
-        scope = self._settings_manager.SCOPE_ENGINE if self._settings_manager else None
-
-        tab_info_list = self._settings_manager.retrieve("tab_info", None, scope) if scope else None
-
-        if tab_info_list:
-            for tab_info in tab_info_list:
-
-                index = self.tabs.add_tab(
-                    name=tab_info.get("tab_name"),
-                    contents=tab_info.get("tab_contents"),
-                )
-        else:
-            self.tabs.add_tab()
-
-        cur_tab_index = self._settings_manager.retrieve("current_tab", None, scope) if self._settings_manager else None
-        if cur_tab_index is not None:
-            self.tabs.setCurrentIndex(cur_tab_index)
-
-        # make sure the settings are saved before the application quits
-        app = QtGui.QApplication.instance()
-        app.aboutToQuit.connect(self._save_settings)
-
-    @property
-    def welcome_message(self):
-        welcome_message = (
-            "Welcome to the Shotgun Python Console!\n\n"
-            "Python %s\n\n" % sys.version )
-
-        if current_engine() is not None:
-            welcome_message += (
-                "- A tk API handle is available via the 'tk' variable\n"
-                "- A Shotgun API handle is available via the 'shotgun' variable\n"
-                "- Your current context is stored in the 'context' variable\n"
-                "- The shell engine can be accessed via the 'engine' variable\n\n"
-            )
-
-    def closeEvent(self, event):
-        """
-        Handles saving settings for the console before it is closed.
-        """
-
-        # closing. disconnect this instance from the about to quit signal
-        app = QtGui.QApplication.instance()
-        app.aboutToQuit.disconnect()
-
-        self._save_settings()
-        super(ShotgunPythonConsoleWidget, self).closeEvent(event)
-
-    def _get_sg_globals(self):
-        """
-        Returns a dict of sg globals for the current engine.
-        """
-
-        engine = current_engine()
-        if engine:
-            return {
-                "tk": engine.tank,
-                "shotgun": engine.shotgun,
-                "context": engine.context,
-                "engine": engine,
-            }
-        else:
-            return {}
-
-    def _save_settings(self):
-        """
-        Save the current tab settings for the session.
-        """
-        scope = self._settings_manager.SCOPE_ENGINE if self._settings_manager else None
-
-        if scope:
-            self._settings_manager.store("tab_info", self.tabs.get_tab_info(), scope)
-            self._settings_manager.store("current_tab", self.tabs.currentIndex(), scope)
 
 
 class PythonTabWidget(QtGui.QTabWidget):
@@ -660,4 +523,3 @@ class _PythonInputInfoWidget(QtGui.QWidget):
                 str(col),
             )
         )
-

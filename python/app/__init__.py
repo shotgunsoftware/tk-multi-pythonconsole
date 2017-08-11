@@ -10,3 +10,8 @@
 
 from . import console
 
+try:
+    from . import shotgun_console
+except:
+    pass
+
