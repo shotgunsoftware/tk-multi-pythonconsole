@@ -13,7 +13,10 @@ from datetime import datetime
 import os
 from threading import Lock
 
-from sgtk.platform.qt import QtCore, QtGui
+try:
+    from sgtk.platform.qt import QtCore, QtGui
+except ImportError:
+    from PySide import QtCore, QtGui
 
 from .util import colorize
 

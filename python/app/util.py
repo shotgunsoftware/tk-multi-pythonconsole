@@ -8,7 +8,10 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from sgtk.platform.qt import QtGui
+try:
+    from sgtk.platform.qt import QtGui
+except ImportError:
+    from PySide import QtGui
 
 
 def colorize(c1, c1_strength, c2, c2_strength):

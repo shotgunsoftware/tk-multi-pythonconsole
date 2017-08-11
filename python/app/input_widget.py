@@ -16,7 +16,10 @@ import math
 import sys
 import traceback
 
-from sgtk.platform.qt import QtCore, QtGui
+try:
+    from sgtk.platform.qt import QtCore, QtGui
+except ImportError:
+    from PySide import QtCore, QtGui
 
 from .redirect import StderrRedirector, StdinRedirector, StdoutRedirector
 from .syntax_highlighter import PythonSyntaxHighlighter

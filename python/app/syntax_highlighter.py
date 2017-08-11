@@ -11,7 +11,10 @@
 import __builtin__
 import keyword as py_keywords
 
-from sgtk.platform.qt import QtCore, QtGui
+try:
+    from sgtk.platform.qt import QtCore, QtGui
+except ImportError:
+    from PySide import QtCore, QtGui
 
 from .util import colorize
 

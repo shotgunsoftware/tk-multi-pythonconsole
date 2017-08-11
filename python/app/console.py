@@ -16,9 +16,15 @@ import urllib2
 import sgtk
 from sgtk.errors import TankError
 from sgtk.platform.engine import current_engine
-from sgtk.platform.qt import QtCore, QtGui
+try:
+    from sgtk.platform.qt import QtCore, QtGui
+except ImportError:
+    from PySide import QtCore, QtGui
 
-settings = sgtk.platform.import_framework("tk-framework-shotgunutils", "settings")
+try:
+    settings = sgtk.platform.import_framework("tk-framework-shotgunutils", "settings")
+except:
+    settings = None
 
 # make sure the images are imported for access to the resources
 from .ui import resources_rc
@@ -298,30 +304,16 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         super(ShotgunPythonConsoleWidget, self).__init__(parent)
 
         engine = current_engine()
-        self._settings_manager = settings.UserSettings(sgtk.platform.current_bundle())
-
-        # if not running in an engine, then we're hosed
-        if not engine:
-            raise TankError(
-                "Unable to initialize ShotgunPythonConsole. No engine running")
+        self._settings_manager = settings.UserSettings(sgtk.platform.current_bundle()) if settings else None
 
         # add a welcome message to the output widget
-        welcome_message = (
-            "Welcome to the Shotgun Python Console!\n\n"
-            "Python %s\n\n"
-            "- A tk API handle is available via the 'tk' variable\n"
-            "- A Shotgun API handle is available via the 'shotgun' variable\n"
-            "- Your current context is stored in the 'context' variable\n"
-            "- The shell engine can be accessed via the 'engine' variable\n\n"
-            % (sys.version,)
-        )
 
         add_sg_globals = lambda i: \
             self.tabs.widget(i).input_widget.add_globals(self._get_sg_globals())
 
         # lambda to add the welcome message to a tab at a given index
         add_welcome_msg = lambda i: \
-            self.tabs.widget(i).output_widget.add_input(welcome_message, prefix=None)
+            self.tabs.widget(i).output_widget.add_input(self.welcome_message, prefix=None)
 
         # set globals as new tabs are created
         self.tabs.tab_added.connect(add_sg_globals)
@@ -330,9 +322,9 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         self.tabs.tab_added.connect(add_welcome_msg)
 
         # try to restore previous tabs
-        scope = self._settings_manager.SCOPE_ENGINE
+        scope = self._settings_manager.SCOPE_ENGINE if self._settings_manager else None
 
-        tab_info_list = self._settings_manager.retrieve("tab_info", None, scope)
+        tab_info_list = self._settings_manager.retrieve("tab_info", None, scope) if scope else None
 
         if tab_info_list:
             for tab_info in tab_info_list:
@@ -344,13 +336,27 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         else:
             self.tabs.add_tab()
 
-        cur_tab_index = self._settings_manager.retrieve("current_tab", None, scope)
+        cur_tab_index = self._settings_manager.retrieve("current_tab", None, scope) if self._settings_manager else None
         if cur_tab_index is not None:
             self.tabs.setCurrentIndex(cur_tab_index)
 
         # make sure the settings are saved before the application quits
         app = QtGui.QApplication.instance()
         app.aboutToQuit.connect(self._save_settings)
+
+    @property
+    def welcome_message(self):
+        welcome_message = (
+            "Welcome to the Shotgun Python Console!\n\n"
+            "Python %s\n\n" % sys.version )
+
+        if current_engine() is not None:
+            welcome_message += (
+                "- A tk API handle is available via the 'tk' variable\n"
+                "- A Shotgun API handle is available via the 'shotgun' variable\n"
+                "- Your current context is stored in the 'context' variable\n"
+                "- The shell engine can be accessed via the 'engine' variable\n\n"
+            )
 
     def closeEvent(self, event):
         """
@@ -370,20 +376,25 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         """
 
         engine = current_engine()
-        return {
-            "tk": engine.tank,
-            "shotgun": engine.shotgun,
-            "context": engine.context,
-            "engine": engine,
-        }
+        if engine:
+            return {
+                "tk": engine.tank,
+                "shotgun": engine.shotgun,
+                "context": engine.context,
+                "engine": engine,
+            }
+        else:
+            return {}
 
     def _save_settings(self):
         """
         Save the current tab settings for the session.
         """
-        scope = self._settings_manager.SCOPE_ENGINE
-        self._settings_manager.store("tab_info", self.tabs.get_tab_info(), scope)
-        self._settings_manager.store("current_tab", self.tabs.currentIndex(), scope)
+        scope = self._settings_manager.SCOPE_ENGINE if self._settings_manager else None
+
+        if scope:
+            self._settings_manager.store("tab_info", self.tabs.get_tab_info(), scope)
+            self._settings_manager.store("current_tab", self.tabs.currentIndex(), scope)
 
 
 class PythonTabWidget(QtGui.QTabWidget):
