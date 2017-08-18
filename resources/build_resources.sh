@@ -25,6 +25,10 @@ function build_qt {
     
     # replace PySide imports with tank.platform.qt and remove line containing Created by date
     sed -i "" -e "s/\(from PySide import \(.*\)\)/try:\n    from tank.platform.qt import \2\nexcept ImportError:\n    \1/g" -e "/# Created:/d" $UI_PYTHON_PATH/$3.py
+    # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
+    # stand alone fashion. This try/except allows portions of the console to be imported outside of a
+    # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
+    # engine running.
 }
 
 function build_ui {

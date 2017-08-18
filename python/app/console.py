@@ -10,7 +10,10 @@
 
 from datetime import datetime
 import os
-
+# NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
+# stand alone fashion. This try/except allows portions of the console to be imported outside of a
+# Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
+# engine running.
 try:
     from sgtk.platform.qt import QtCore, QtGui
 except ImportError:
