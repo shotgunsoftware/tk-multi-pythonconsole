@@ -38,7 +38,7 @@ class PythonConsoleApp(sgtk.platform.Application):
         """
         Called as the application is being initialized
         """
-        
+
         # first, we use the special import_module command to access the app module
         # that resides inside the python folder in the app. This is where the actual UI
         # and business logic of the app is kept. By using the import_module command,
@@ -68,7 +68,7 @@ class PythonConsoleApp(sgtk.platform.Application):
         """
         app_payload = self.import_module("app")
         widget = self.engine.show_dialog("Python Console", self,
-            app_payload.console.ShotgunPythonConsoleWidget)
+                                         app_payload.shotgun_console.ShotgunPythonConsoleWidget)
         self._current_dialog = widget
         return widget
 
@@ -88,7 +88,7 @@ class PythonConsoleApp(sgtk.platform.Application):
                 self._unique_panel_id,
                 "Shotgun Python Console",
                 self,
-                app_payload.console.ShotgunPythonConsoleWidget
+                app_payload.shotgun_console.ShotgunPythonConsoleWidget
             )
         except AttributeError, e:
             # just to gracefully handle older engines and older cores
