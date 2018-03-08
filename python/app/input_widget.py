@@ -171,18 +171,27 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         # exec the python code, redirecting any stdout to the ouptut signal.
         # also redirect stdin if need be
-        with nested(self._stdout_redirect, self._stdin_redirect):
-            try:
-                # use our copy of locals to allow persistence between executions
-                if eval_code:
+        if eval_code:
+            with nested(self._stdout_redirect, self._stdin_redirect):
+                try:
+                    # use our copy of locals to allow persistence between executions
                     results = eval(python_code, globals(), self._locals)
-                    self.results.emit(str(results))
+                except Exception:
+                    # oops, error encountered. write/redirect to the error signal
+                    with self._stderr_redirect as stderr:
+                        stderr.write(self._format_exc())
                 else:
+                    self.results.emit(str(results))
+
+        # exec
+        else:
+            with nested(self._stdout_redirect, self._stdin_redirect):
+                try:
                     exec(python_code, globals(), self._locals)
-            except StandardError:
-                # oops, error encountered. write/redirect to the error signal
-                with self._stderr_redirect as stderr:
-                    stderr.write(self._format_exc())
+                except Exception:
+                    # oops, error encountered. write/redirect to the error signal
+                    with self._stderr_redirect as stderr:
+                        stderr.write(self._format_exc())
 
     def highlight_current_line(self):
         """Highlight the current line of the input widget."""
