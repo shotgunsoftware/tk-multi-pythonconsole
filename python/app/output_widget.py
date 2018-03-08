@@ -18,8 +18,10 @@ from threading import Lock
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
 try:
+    import sgtk
     from sgtk.platform.qt import QtCore, QtGui
 except ImportError:
+    sgtk = None
     from PySide import QtCore, QtGui
 
 from .util import colorize
@@ -130,6 +132,11 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         :param text: The error text to display.
 
         """
+
+        # if shotgun/toolkit is available, log the error message to the current
+        # engine.
+        if sgtk:
+            sgtk.platform.current_engine().logger.error(text)
 
         text = str(text)
 
