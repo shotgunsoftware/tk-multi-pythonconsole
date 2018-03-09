@@ -104,6 +104,7 @@ class StdoutRedirector(QtCore.QObject):
             msg = unicode.encode(msg, "utf-8")
 
         self.output.emit(msg)
+        QtCore.QCoreApplication.processEvents()
 
         if self._tee and self._handle:
             self._handle.write(msg)
@@ -156,6 +157,7 @@ class StderrRedirector(QtCore.QObject):
             msg = unicode.encode(msg, "utf-8")
 
         self.error.emit(msg)
+        QtCore.QCoreApplication.processEvents()
 
         if self._tee:
             self._handle.write(msg)
