@@ -194,7 +194,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                     exec(python_code, exec_scope, exec_scope)
                     # need to check what has changed in exec_scope and update our locals
                     existing_scope = dict(globals(), **self._locals)
-                    # this wont handle del, but that is probably isn't used a lot interactivly
+                    # this wont handle del, but that probably isn't used a lot interactivly
                     for key in exec_scope:
                         if (key in existing_scope and existing_scope[key] != exec_scope[key]) or key not in existing_scope:
                             self._locals[key] = exec_scope[key]
