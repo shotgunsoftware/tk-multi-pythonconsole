@@ -58,7 +58,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         super(PythonInputWidget, self).__init__(parent)
 
         # local symbol table for this input widget.
-        self._locals = {}
+        # copy globals and use this for everything
+        self._locals = globals().copy()
         self._echo = True
         self._show_line_numbers = True
 
@@ -121,11 +122,10 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
     def add_globals(self, new_globals):
         """
-        Updates ``globals()`` with the supplied values.
+        Updates global variables with the supplied values.
         """
 
-        globals_dict = globals()
-        globals_dict.update(new_globals)
+        self._locals.update(new_globals)
 
     def execute(self):
         """Execute the contents of the input widget."""
@@ -175,7 +175,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             with nested(self._stdout_redirect, self._stdin_redirect):
                 try:
                     # use our copy of locals to allow persistence between executions
-                    results = eval(python_code, globals(), self._locals)
+                    results = eval(python_code, self._locals, self._locals)
                 except Exception:
                     # oops, error encountered. write/redirect to the error signal
                     with self._stderr_redirect as stderr:
@@ -187,17 +187,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         else:
             with nested(self._stdout_redirect, self._stdin_redirect):
                 try:
-                    # in python3 a collections.ChainMap might be a cleaner solution
-                    # by using one dictionary for both locals and globals 
-                    # it gets around the weird way exec adds things to the global scope
-                    exec_scope = dict(globals(), **self._locals)
-                    exec(python_code, exec_scope, exec_scope)
-                    # need to check what has changed in exec_scope and update our locals
-                    existing_scope = dict(globals(), **self._locals)
-                    # this wont handle del, but that probably isn't used a lot interactivly
-                    for key in exec_scope:
-                        if (key in existing_scope and existing_scope[key] != exec_scope[key]) or key not in existing_scope:
-                            self._locals[key] = exec_scope[key]
+                    # locals gets passed in as both global and locals to fix look up issues
+                    exec(python_code, self._locals, self._locals)
                 except Exception:
                     # oops, error encountered. write/redirect to the error signal
                     with self._stderr_redirect as stderr:
