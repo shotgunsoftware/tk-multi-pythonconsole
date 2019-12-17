@@ -187,7 +187,17 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         else:
             with nested(self._stdout_redirect, self._stdin_redirect):
                 try:
-                    exec(python_code, globals(), self._locals)
+                    # in python3 a collections.ChainMap might be a cleaner solution
+                    # by using one dictionary for both locals and globals 
+                    # it gets around the weird way exec adds things to the global scope
+                    exec_scope = dict(globals(), **self._locals)
+                    exec(python_code, exec_scope, exec_scope)
+                    # need to check what has changed in exec_scope and update our locals
+                    existing_scope = dict(globals(), **self._locals)
+                    # this wont handle del, but that is probably isn't used a lot interactivly
+                    for key in exec_scope:
+                        if (key in existing_scope and existing_scope[key] != exec_scope[key]) or key not in existing_scope:
+                            self._locals[key] = exec_scope[key]
                 except Exception:
                     # oops, error encountered. write/redirect to the error signal
                     with self._stderr_redirect as stderr:
