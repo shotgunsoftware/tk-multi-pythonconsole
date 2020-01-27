@@ -158,12 +158,12 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         try:
             # try to compile the python as an expression
             python_code = compile(python_script, "<python input>", "eval")
-        except SyntaxError, e:
+        except SyntaxError as e:
             # not an expression. must exec
             eval_code = False
             try:
                 python_code = compile(python_script, "python input", "exec")
-            except SyntaxError, e:
+            except SyntaxError as e:
                 # oops, syntax error. write to our stderr
                 with self._stderr_redirect as stderr:
                     stderr.write(self._format_exc())
@@ -333,7 +333,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         fh = open(save_path, "w")
         try:
             fh.write(python_script)
-        except Exception, e:
+        except Exception as e:
             QtGui.QMessageBox.warning(
                 self,
                 "Failed to Save Python Script",

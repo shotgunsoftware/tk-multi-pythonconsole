@@ -108,7 +108,7 @@ class ExternalSources(HookBaseClass):
 
         try:
             contents = urllib2.urlopen(gist["file_url"]).read()
-        except Exception, e:
+        except Exception as e:
             contents = "# Unable to load gist contents... :("
 
         github_icon = QtGui.QIcon(":/tk_multi_pythonconsole/github.png")
@@ -132,7 +132,7 @@ def get_gists(username, app):
     url = PUBLIC_GISTS_QUERY_URL % (username, os.environ["GITHUB_OAUTH_TOKEN"])
     try:
         data = json.load(urllib2.urlopen(url))
-    except Exception, e:
+    except Exception as e:
         data = {}
 
     gists = []

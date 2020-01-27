@@ -90,7 +90,7 @@ class PythonConsoleApp(sgtk.platform.Application):
                 self,
                 app_payload.shotgun_console.ShotgunPythonConsoleWidget
             )
-        except AttributeError, e:
+        except AttributeError as e:
             # just to gracefully handle older engines and older cores
             self.log_warning("Could not execute show_panel method - please upgrade "
                              "to latest core and engine! Falling back on show_dialog. "
