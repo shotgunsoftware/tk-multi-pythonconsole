@@ -1,11 +1,11 @@
 # Copyright (c) 2016 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sgtk
@@ -52,10 +52,11 @@ class PythonConsoleApp(sgtk.platform.Application):
 
         # also register a menu entry on the shotgun menu so that users
         # can launch the panel
-        self.engine.register_command("Shotgun Python Console...",
-                                     self.create_panel,
-                                     {"type": "context_menu",
-                                      "short_name": "python_console"})
+        self.engine.register_command(
+            "Shotgun Python Console...",
+            self.create_panel,
+            {"type": "context_menu", "short_name": "python_console"},
+        )
 
     def create_dialog(self):
         """
@@ -67,8 +68,11 @@ class PythonConsoleApp(sgtk.platform.Application):
         :returns: The widget associated with the dialog.
         """
         app_payload = self.import_module("app")
-        widget = self.engine.show_dialog("Python Console", self,
-                                         app_payload.shotgun_console.ShotgunPythonConsoleWidget)
+        widget = self.engine.show_dialog(
+            "Python Console",
+            self,
+            app_payload.shotgun_console.ShotgunPythonConsoleWidget,
+        )
         self._current_dialog = widget
         return widget
 
@@ -88,17 +92,16 @@ class PythonConsoleApp(sgtk.platform.Application):
                 self._unique_panel_id,
                 "Shotgun Python Console",
                 self,
-                app_payload.shotgun_console.ShotgunPythonConsoleWidget
+                app_payload.shotgun_console.ShotgunPythonConsoleWidget,
             )
         except AttributeError as e:
             # just to gracefully handle older engines and older cores
-            self.log_warning("Could not execute show_panel method - please upgrade "
-                             "to latest core and engine! Falling back on show_dialog. "
-                             "Error: %s" % e)
+            self.log_warning(
+                "Could not execute show_panel method - please upgrade "
+                "to latest core and engine! Falling back on show_dialog. "
+                "Error: %s" % e
+            )
             widget = self.create_dialog()
         self._current_panel = widget
 
         return widget
-
-
-

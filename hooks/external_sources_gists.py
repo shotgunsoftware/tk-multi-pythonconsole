@@ -30,6 +30,7 @@ PUBLIC_GISTS_QUERY_URL = "https://api.github.com/users/%s/gists?access_token=%s"
 # cached gists for queried users
 QUERIED_GISTS = {}
 
+
 class ExternalSources(HookBaseClass):
     """
     Methods that define external sources for python console tabs.
@@ -152,7 +153,9 @@ def get_gists(username, app):
 
         # only return gists with 1 file (don't know how to handle more yet)
         if len(file_data.keys()) != 1:
-            app.log_debug("Found gist with multiple files. Don't know how to handle that yet.")
+            app.log_debug(
+                "Found gist with multiple files. Don't know how to handle that yet."
+            )
             continue
 
         file_info = file_data[file_data.keys()[0]]
@@ -176,4 +179,3 @@ def get_gists(username, app):
         )
 
     return gists
-

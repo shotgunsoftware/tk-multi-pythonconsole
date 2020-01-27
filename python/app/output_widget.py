@@ -156,11 +156,10 @@ class OutputStreamWidget(QtGui.QTextBrowser):
     def _input_text_color(self):
         """The input text color."""
 
-        if not hasattr(self, '_input_color'):
+        if not hasattr(self, "_input_color"):
 
             self._input_color = colorize(
-                self.palette().base().color(), 1,
-                QtGui.QColor(127, 127, 127), 2,
+                self.palette().base().color(), 1, QtGui.QColor(127, 127, 127), 2,
             )
 
         return self._input_color
@@ -168,12 +167,9 @@ class OutputStreamWidget(QtGui.QTextBrowser):
     def _error_text_color(self):
         """The error text color."""
 
-        if not hasattr(self, '_err_color'):
+        if not hasattr(self, "_err_color"):
 
-            self._err_color = colorize(
-                self.textColor(), 1,
-                QtGui.QColor(255, 0, 0), 3,
-            )
+            self._err_color = colorize(self.textColor(), 1, QtGui.QColor(255, 0, 0), 3,)
 
         return self._err_color
 
@@ -229,7 +225,9 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         QWidget {
             font-size: %spt;
         }
-        """ % (size,)
+        """ % (
+            size,
+        )
         self.setStyleSheet(style)
 
     def zoom_in(self):
@@ -243,4 +241,3 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         Zoom out on the text.
         """
         self.zoom(-1)
-

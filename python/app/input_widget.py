@@ -65,16 +65,13 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # helps prevent unnecessary redraws of the line number area later.
         # See the Qt docs example for line numbers in text edit widgets:
         # http://doc.qt.io/qt-4.8/qt-widgets-codeeditor-example.html
-        self._count_cache = {
-            "blocks": None,
-            "cursor_blocks": None
-        }
+        self._count_cache = {"blocks": None, "cursor_blocks": None}
 
         self.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
         self.setWordWrapMode(QtGui.QTextOption.NoWrap)
 
         # action to trigger execution of the current code
-        self.execute_action = QtGui.QAction('Execute', self)
+        self.execute_action = QtGui.QAction("Execute", self)
         self.execute_action.setShortcut(QtGui.QKeySequence("Ctrl+Return"))
         self.addAction(self.execute_action)
 
@@ -83,7 +80,9 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         self._stderr_redirect = StderrRedirector()
         self._stdin_redirect = StdinRedirector(self._readline)
 
-        self._syntax_highlighter = PythonSyntaxHighlighter(self.document(), self.palette())
+        self._syntax_highlighter = PythonSyntaxHighlighter(
+            self.document(), self.palette()
+        )
         self._syntax_highlighter.setDocument(self.document())
 
         self._line_number_area = _LineNumberArea(self)
@@ -117,7 +116,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         self.highlight_current_line()
 
         # initialize the line number area
-        self._update_line_number_area_width(0);
+        self._update_line_number_area_width(0)
 
     def add_globals(self, new_globals):
         """
@@ -197,8 +196,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """Highlight the current line of the input widget."""
 
         extra_selection = QtGui.QTextEdit.ExtraSelection()
-        extra_selection.format.setBackground(
-            QtGui.QBrush(self._current_line_color()))
+        extra_selection.format.setBackground(QtGui.QBrush(self._current_line_color()))
         extra_selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
         extra_selection.cursor = self.textCursor()
         extra_selection.cursor.clearSelection()
@@ -211,10 +209,12 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         :param event: key press event object.
         """
 
-        if (event.modifiers() & QtCore.Qt.ShiftModifier and
-            event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return]):
-                self.insertPlainText("\n")
-                event.accept()
+        if event.modifiers() & QtCore.Qt.ShiftModifier and event.key() in [
+            QtCore.Qt.Key_Enter,
+            QtCore.Qt.Key_Return,
+        ]:
+            self.insertPlainText("\n")
+            event.accept()
         elif event.key() == QtCore.Qt.Key_Tab:
             # intercept the tab key and insert 4 spaces
             self.insertPlainText("    ")
@@ -227,7 +227,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         if self._show_line_numbers:
             digits = math.floor(math.log10(self.blockCount())) + 1
-            return 6 + self.fontMetrics().width('8') * digits
+            return 6 + self.fontMetrics().width("8") * digits
         else:
             return 0
 
@@ -246,10 +246,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         line_num_rect = event.rect()
 
         # fill it with the line number base color
-        painter.fillRect(
-            line_num_rect,
-            self._line_number_area_base_color()
-        )
+        painter.fillRect(line_num_rect, self._line_number_area_base_color())
 
         painter.setPen(self.palette().base().color())
         painter.drawLine(line_num_rect.topLeft(), line_num_rect.bottomLeft())
@@ -262,9 +259,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         block_num = block.blockNumber()
 
         top = int(
-            self.blockBoundingGeometry(block).translated(
-                self.contentOffset()
-            ).top()
+            self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
         )
 
         bottom = top + int(self.blockBoundingRect(block).height())
@@ -276,11 +271,12 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                 num = str(block_num + 1)
                 painter.setPen(self._line_number_color())
                 painter.drawText(
-                    -2, top,
+                    -2,
+                    top,
                     self._line_number_area.width(),
                     self.fontMetrics().height(),
                     QtCore.Qt.AlignRight,
-                    num
+                    num,
                 )
 
             block = block.next()
@@ -301,7 +297,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             contents_rect.left(),
             contents_rect.top(),
             self.line_number_area_width(),
-            contents_rect.height()
+            contents_rect.height(),
         )
         self._line_number_area.setGeometry(line_number_area_rect)
 
@@ -408,7 +404,9 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         QWidget {
             font-size: %spt;
         }
-        """ % (size,)
+        """ % (
+            size,
+        )
         self.setStyleSheet(style)
 
     def zoom_in(self):
@@ -435,10 +433,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             base_color = palette.base().color()
             highlight_color = palette.highlight().color()
 
-            self._cur_line_color = colorize(
-                base_color, 2,
-                highlight_color, 1,
-            )
+            self._cur_line_color = colorize(base_color, 2, highlight_color, 1,)
 
         return self._cur_line_color
 
@@ -450,31 +445,25 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
     def _line_number_area_base_color(self):
         """Get a line number base color."""
 
-        if not hasattr(self, '_line_num_base_color'):
+        if not hasattr(self, "_line_num_base_color"):
             palette = self.palette()
             base_color = palette.base().color()
             window_color = palette.window().color()
 
-            self._line_num_base_color = colorize(
-                base_color, 1,
-                window_color, 1,
-            )
+            self._line_num_base_color = colorize(base_color, 1, window_color, 1,)
 
         return self._line_num_base_color
 
     def _line_number_color(self):
         """Get a line number color."""
 
-        if not hasattr(self, '_line_num_color'):
+        if not hasattr(self, "_line_num_color"):
 
             palette = self.palette()
             base_color = palette.base().color()
             highlight_color = palette.highlight().color()
 
-            self._line_num_color = colorize(
-                base_color, 1,
-                highlight_color, 2,
-            )
+            self._line_num_color = colorize(base_color, 1, highlight_color, 2,)
 
         return self._line_num_color
 
@@ -484,17 +473,14 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         :return: a string for the user input.
         """
-        dialog = QtGui.QInputDialog(
-            parent=self,
-            flags=QtCore.Qt.FramelessWindowHint
-        )
+        dialog = QtGui.QInputDialog(parent=self, flags=QtCore.Qt.FramelessWindowHint)
         dialog.setLabelText("Python is requesting input")
         dialog.adjustSize()
 
         dialog.resize(self.width() - 2, dialog.height())
         dialog.move(
             self.mapToGlobal(self.rect().topLeft()).x(),
-            self.mapToGlobal(self.rect().bottomLeft()).y() - dialog.height()
+            self.mapToGlobal(self.rect().bottomLeft()).y() - dialog.height(),
         )
 
         try:
@@ -512,19 +498,19 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         :param dy: The horizontal scrolled difference.
         """
 
-        if (dy):
+        if dy:
             self._line_number_area.scroll(0, dy)
-        elif (self._count_cache["blocks"] != self.blockCount() or
-              self._count_cache["cursor_blocks"] != self.textCursor().block().lineCount()):
+        elif (
+            self._count_cache["blocks"] != self.blockCount()
+            or self._count_cache["cursor_blocks"]
+            != self.textCursor().block().lineCount()
+        ):
             self._line_number_area.update(
-                0,
-                rect.y(),
-                self._line_number_area.width(),
-                rect.height()
+                0, rect.y(), self._line_number_area.width(), rect.height()
             )
             self._count_cache = {
                 "blocks": self.blockCount(),
-                "cursor_blocks": self.textCursor().block().lineCount()
+                "cursor_blocks": self.textCursor().block().lineCount(),
             }
 
         if rect.contains(self.viewport().rect()):
@@ -557,4 +543,3 @@ class _LineNumberArea(QtGui.QWidget):
         :param event: paint event object.
         """
         self._editor.paint_line_numbers(event)
-
