@@ -157,12 +157,12 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         try:
             # try to compile the python as an expression
             python_code = compile(python_script, "<python input>", "eval")
-        except SyntaxError as e:
+        except SyntaxError:
             # not an expression. must exec
             eval_code = False
             try:
                 python_code = compile(python_script, "python input", "exec")
-            except SyntaxError as e:
+            except SyntaxError:
                 # oops, syntax error. write to our stderr
                 with self._stderr_redirect as stderr:
                     stderr.write(self._format_exc())
