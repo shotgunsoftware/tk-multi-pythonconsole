@@ -11,7 +11,6 @@
 # allow context manager in python 2.5
 from __future__ import with_statement
 
-from contextlib import nested
 import math
 import sys
 import traceback
@@ -137,7 +136,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # If the selection obtained from an editor spans a line break, the
         # text will contain a Unicode U+2029 paragraph separator character
         # instead of a newline \n character.
-        python_script = python_script.replace(u"\u2029", "\n")
+        # python_script = python_script.replace(u"\u2029", "\n")
         python_script = str(python_script).strip()
 
         if not python_script:
@@ -171,7 +170,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # exec the python code, redirecting any stdout to the ouptut signal.
         # also redirect stdin if need be
         if eval_code:
-            with nested(self._stdout_redirect, self._stdin_redirect):
+            with self._stdout_redirect, self._stdin_redirect:
                 try:
                     # use our copy of locals to allow persistence between executions
                     results = eval(python_code, globals(), self._locals)
@@ -184,7 +183,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         # exec
         else:
-            with nested(self._stdout_redirect, self._stdin_redirect):
+            with self._stdout_redirect, self._stdin_redirect:
                 try:
                     exec(python_code, globals(), self._locals)
                 except Exception:
@@ -439,8 +438,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
     def _format_exc(self):
         """Get the latest stack trace and format it for display."""
-        tb = sys.exc_info()[2]
-        return traceback.format_exc(tb)
+        return traceback.format_exc()
 
     def _line_number_area_base_color(self):
         """Get a line number base color."""

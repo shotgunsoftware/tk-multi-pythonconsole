@@ -8,7 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import __builtin__
 import keyword as py_keywords
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
@@ -19,6 +18,9 @@ try:
     from sgtk.platform.qt import QtCore, QtGui
 except ImportError:
     from PySide import QtCore, QtGui
+
+# TODO: this needs to be handled in a Toolkit agnostic way.
+from tank_vendor.six.moves import builtins
 
 from .util import colorize
 
@@ -46,7 +48,7 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     keywords = py_keywords.kwlist
 
     # Python builtins
-    builtins = dir(__builtin__)
+    builtins = dir(builtins)
 
     # Python operators
     operators = [

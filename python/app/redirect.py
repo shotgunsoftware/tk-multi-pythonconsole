@@ -19,6 +19,9 @@ try:
 except ImportError:
     from PySide import QtCore, QtGui
 
+# TODO: this needs to be handled in a Toolkit agnostic way.
+from tank_vendor import six
+
 
 class StdinRedirector(QtCore.QObject):
     """Handles redirecting stdin.
@@ -101,8 +104,7 @@ class StdoutRedirector(QtCore.QObject):
 
         If tee, then also write to stdout.
         """
-        if isinstance(msg, unicode):
-            msg = unicode.encode(msg, "utf-8")
+        six.ensure_str(msg)
 
         self.output.emit(msg)
         QtCore.QCoreApplication.processEvents()
@@ -155,8 +157,7 @@ class StderrRedirector(QtCore.QObject):
 
         If tee, then also write to stderr.
         """
-        if isinstance(msg, unicode):
-            msg = unicode.encode(msg, "utf-8")
+        six.ensure_str(msg)
 
         self.error.emit(msg)
         QtCore.QCoreApplication.processEvents()

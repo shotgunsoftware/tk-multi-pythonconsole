@@ -158,7 +158,9 @@ def get_gists(username, app):
             )
             continue
 
-        file_info = file_data[file_data.keys()[0]]
+        # since the dictionary only contains one key value pair,
+        # just extract the first and only one.
+        file_info = list(d.values())[0]
 
         file_url = file_info.get("raw_url")
         if not file_url:
