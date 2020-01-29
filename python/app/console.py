@@ -99,6 +99,8 @@ class PythonConsoleWidget(QtGui.QWidget):
         in_open_btn.setMaximumSize(QtCore.QSize(30, 30))
         in_open_btn.setObjectName("in_open_btn")
         in_open_btn.setToolTip("Load python script from a file.")
+        # Delayed load of menu.
+        # Click and hold the open button to trigger the menu.
         in_open_btn.setMenu(self._open_file_menu)
         in_open_btn.setPopupMode(QtGui.QToolButton.DelayedPopup)
 
@@ -222,7 +224,7 @@ class PythonConsoleWidget(QtGui.QWidget):
             open_dialog = QtGui.QFileDialog(
                 parent=QtGui.QApplication.activeWindow(),
                 caption="Open Python Script",
-                directory=path,
+                directory=path if path else "",
                 filter="*.py",
             )
             open_dialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -248,7 +250,11 @@ class PythonConsoleWidget(QtGui.QWidget):
             fh.close()
 
     def _build_open_file_menu(self):
-        """Dynamcially build the popup menu for the file open/load button."""
+        """
+        Dynamically build the popup menu for the file open/load button.
+        This is called when the menu is triggered via a delayed load.
+        The user must click and hold the open button to trigger the menu building.
+        """
 
         self._open_file_menu.clear()
         self._open_file_menu.addAction(self._open_file_action)
