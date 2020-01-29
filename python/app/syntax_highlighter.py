@@ -19,8 +19,10 @@ try:
 except ImportError:
     from PySide import QtCore, QtGui
 
-# TODO: this needs to be handled in a Toolkit agnostic way.
-from tank_vendor.six.moves import builtins
+try:
+    from tank_vendor.six.moves import builtins
+except ImportError:
+    from six.moves import builtins
 
 from .util import colorize
 

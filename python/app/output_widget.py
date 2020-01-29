@@ -24,6 +24,11 @@ except ImportError:
     sgtk = None
     from PySide import QtCore, QtGui
 
+try:
+    from tank_vendor import six
+except ImportError:
+    import six
+
 from .util import colorize
 
 
@@ -115,7 +120,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
         """
 
-        text = str(text)
+        text = six.ensure_str(text)
 
         with self._write_lock:
             text = self._to_html(text)
@@ -138,7 +143,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         if sgtk:
             sgtk.platform.current_engine().log_error(text)
 
-        text = str(text)
+        text = six.ensure_str(text)
 
         # write the error
         with self._write_lock:
