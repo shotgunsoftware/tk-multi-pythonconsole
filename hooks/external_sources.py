@@ -17,6 +17,7 @@ from sgtk.platform.qt import QtGui
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
+
 class ExternalSources(HookBaseClass):
     """
     Methods that define external sources for python console tabs.
@@ -40,4 +41,3 @@ class ExternalSources(HookBaseClass):
         """
 
         return []
-
