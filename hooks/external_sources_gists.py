@@ -95,7 +95,7 @@ class ExternalSources(HookBaseClass):
                 gist_action = QtGui.QAction(gist["file_name"], gist_user_menu)
                 # PySide2 seems to pass the checked state through as an args instead of a kwarg
                 # so we need to provide a kwarg for it to pass the check state without overriding the gist value.
-                l = lambda checked=False, g=gist: self._add_gist_tab(checked, g)
+                l = lambda checked, g=gist: self._add_gist_tab(checked, g)
                 gist_action.triggered.connect(l)
                 gist_user_menu.addAction(gist_action)
 
