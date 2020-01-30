@@ -19,10 +19,8 @@ import traceback
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
-try:
-    from sgtk.platform.qt import QtCore, QtGui
-except ImportError:
-    from PySide import QtCore, QtGui
+from .qt_importer import QtGui, QtCore
+
 
 from .redirect import StderrRedirector, StdinRedirector, StdoutRedirector
 from .syntax_highlighter import PythonSyntaxHighlighter

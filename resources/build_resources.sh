@@ -27,7 +27,7 @@ function build_qt {
     # On OSX sed doesn't interpret \n as a new line. Instead we must insert the new line string
     lf=$'\n'
 
-    sed -i "" -e "s/\(from PySide import \(.*\)\)/try:\\$lf    from sgtk.platform.qt import \2\\$lf\except ImportError:\\$lf    \1/g" -e "/# Created:/d" $UI_PYTHON_PATH/$3.py
+    sed -i "" -e "s/\(from PySide import \(.*\)\)/try:\\$lf    from sgtk.platform.qt import \2\\$lf\except ImportError:\\$lf    try:\\$lf        from PySide2 import \2\\$lf    except ImportError:\\$lf        \1/g" -e "/# Created:/d" $UI_PYTHON_PATH/$3.py
     # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
     # stand alone fashion. This try/except allows portions of the console to be imported outside of a
     # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit

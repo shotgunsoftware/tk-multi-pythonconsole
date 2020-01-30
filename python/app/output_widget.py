@@ -17,12 +17,13 @@ from threading import Lock
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
+
+from .qt_importer import QtCore, QtGui
+
 try:
     import sgtk
-    from sgtk.platform.qt import QtCore, QtGui
 except ImportError:
     sgtk = None
-    from PySide import QtCore, QtGui
 
 try:
     from tank_vendor import six
