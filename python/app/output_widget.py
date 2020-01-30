@@ -8,15 +8,20 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import cgi
 from datetime import datetime
 import os
+import sys
 from threading import Lock
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
+
+if sys.version_info.major == 2:
+    from cgi import escape
+elif sys.version_info.major == 3:
+    from html import escape as escape
 
 from .qt_importer import QtCore, QtGui
 
@@ -191,7 +196,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
     def _to_html(self, text, color=None):
         """Attempt to properly escape and color text for display."""
 
-        text = cgi.escape(text)
+        text = escape(text)
         text = text.replace(" ", "&nbsp;")
         text = text.replace("\n", "<br />")
 

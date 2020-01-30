@@ -1,32 +1,150 @@
+import pytest
 import sys
 import os
-import pytest
-
-# Tests the python console standalone without sgtk being present.
-current_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, current_path + "/../python")
-
-# make sure tk-core is removed from the path so that
-# we can test the python console app standalone.
-for a_path in reversed(sys.path):
-    if "tk-core" in a_path:
-        sys.path.remove(a_path)
 
 
-def test_cant_import_sgtk():
+@pytest.fixture(scope="session")
+def current_path():
+    return os.path.dirname(os.path.realpath(__file__))
+
+
+@pytest.fixture(scope="session")
+def set_environment(current_path):
+    """
+    Tests the python console standalone without sgtk being present.
+    :param current_path:
+    :return:
+    """
+    # Added the path to the console app so it can be imported.
+    sys.path.insert(0, current_path + "/../python")
+
+    # make sure tk-core is removed from the path so that
+    # we can test the python console app standalone.
+    for a_path in reversed(sys.path):
+        if "tk-core" in a_path:
+            sys.path.remove(a_path)
+
+
+@pytest.fixture(scope="session")
+def imported_app(set_environment):
+    import app as console_app
+    from app.qt_importer import QtGui
+
+    q_app = QtGui.QApplication([])
+    return console_app
+
+
+@pytest.fixture()
+def console_widget(imported_app):
+    return imported_app.console.PythonConsoleWidget()
+
+
+def test_cant_import_sgtk(set_environment):
     """
     Since we are testing the python console app standalone
     make sure we can't import sgtk from tk-core.
     :return:
     """
+    print(sys.path)
     with pytest.raises(ImportError):
         import sgtk
 
 
-def test_import_app():
+def test_import_app(set_environment):
     """
     Test that we can import the app.
     There should be no dependency on having sgtk present.
     :return:
     """
     import app
+
+
+def test_create_tab(console_widget):
+    """
+    Test that we can create a new python editor tab on the `PythonConsoleWidget`
+    :return:
+    """
+    console_widget.tabs.add_tab()
+    assert console_widget.tabs.count() == 1
+
+
+def test_remove_tab(console_widget):
+    """
+    Test that we can remove a python editor tab on the `PythonConsoleWidget`
+    :return:
+    """
+    # We should have a fresh console_widget so no tabs will yet be created
+    assert console_widget.tabs.count() == 0
+    # By default the standalone console doesn't have a tab inserted and
+    # it is up to the person invoking it to created the first tab.
+    # However if you remove the last tab it will automatically create
+    # another tab.
+    console_widget.tabs.add_tab()
+    console_widget.tabs.add_tab()
+    assert console_widget.tabs.count() == 2
+    # Check that when have to tabs and we remove one, we only have one left.
+    console_widget.tabs.remove_tab(0)
+    assert console_widget.tabs.count() == 1
+    # Check that when we remove the last tab, we still have one tab,
+    # due to it automatically creating one.
+    console_widget.tabs.remove_tab(0)
+    assert console_widget.tabs.count() == 1
+
+
+@pytest.mark.parametrize(
+    "script, python_version",
+    [
+        ("resource_script.py", 2),
+        (
+            "resource_script_containing_unicode.py",
+            3,
+        ),  # only compare the contents of this one in Python 3
+    ],
+)
+def test_open_script(console_widget, current_path, script, python_version):
+    """
+    Test opening a script in a new tab and ensuring the contents are the same.
+    :param console_widget:
+    :return:
+    """
+    script = os.path.join(current_path, script)
+    console_widget.open(script)
+    # make sure it created a new tab for the script
+    assert console_widget.tabs.count() == 1
+
+    if python_version <= sys.version_info.major:
+        # Check the contents of the widget.
+        # The contents won't be the same in python 2,
+        # so only tests the files whose python_version is the same or less than
+        # the current python major version.
+        widget = console_widget.tabs.widget(0)
+        tab_contents = widget.input_widget.toPlainText()
+        with open(script, "r") as f:
+            original_contents = f.read()
+
+        assert tab_contents == original_contents
+
+
+@pytest.mark.parametrize(
+    "script, python_version",
+    [
+        ("resource_script.py", 2),
+        (
+            "resource_script_containing_unicode.py",
+            3,
+        ),  # only compare the contents of this one in Python 3
+    ],
+)
+def test_execute_script(console_widget, current_path, script, python_version):
+    """
+    Test opening a script in a new tab and executing it.
+    :param console_widget:
+    :return:
+    """
+    script = os.path.join(current_path, script)
+    console_widget.open(script)
+    # make sure it created a new tab for the script
+    assert console_widget.tabs.count() == 1
+
+    tab_widget = console_widget.tabs.widget(0)
+    tab_widget.input_widget.execute()
