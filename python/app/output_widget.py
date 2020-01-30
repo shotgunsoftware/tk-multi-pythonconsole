@@ -28,7 +28,10 @@ except ImportError:
 try:
     from tank_vendor import six
 except ImportError:
-    import six
+    try:
+        import six
+    except ImportError:
+        six = None
 
 from .util import colorize
 
@@ -121,7 +124,10 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
         """
 
-        text = six.ensure_str(text)
+        if six:
+            # if six can be imported sanitize the string.
+            # This may lead to unicode errors if not imported in python 2
+            text = six.ensure_str(text)
 
         with self._write_lock:
             text = self._to_html(text)
@@ -144,7 +150,10 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         if sgtk:
             sgtk.platform.current_engine().log_error(text)
 
-        text = six.ensure_str(text)
+        if six:
+            # if six can be imported sanitize the string.
+            # This may lead to unicode errors if not imported in python 2
+            text = six.ensure_str(text)
 
         # write the error
         with self._write_lock:

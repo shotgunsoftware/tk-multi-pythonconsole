@@ -19,7 +19,12 @@ from .qt_importer import QtCore, QtGui
 try:
     from tank_vendor.six.moves import builtins
 except ImportError:
-    from six.moves import builtins
+    import sys
+
+    if sys.version_info.major == 2:
+        import __builtin__ as builtins
+    elif sys.version_info.major == 3:
+        import builtins
 
 from .util import colorize
 
