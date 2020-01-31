@@ -58,8 +58,12 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         super(PythonInputWidget, self).__init__(parent)
 
         # local symbol table for this input widget.
-        # copy globals and use this for everything
-        self._locals = globals().copy()
+        # match what dunders appear in an interactive python shell
+        self._locals = {
+            '__name__': '__main__',
+            '__doc__': None,
+            '__package__': None,
+        }
         self._echo = True
         self._show_line_numbers = True
 
