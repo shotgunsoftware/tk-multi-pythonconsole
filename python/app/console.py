@@ -221,7 +221,9 @@ class PythonConsoleWidget(QtGui.QWidget):
             open_dialog = QtGui.QFileDialog(
                 parent=QtGui.QApplication.activeWindow(),
                 caption="Open Python Script",
-                directory=path if path else "",
+                # If this is called form a QAction trigger then the path gets passed the "checked" state of the action.
+                # We should treat this as if no Path has been passed.
+                directory=path if type(path) is str else "",
                 filter="*.py",
             )
             open_dialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -235,7 +237,7 @@ class PythonConsoleWidget(QtGui.QWidget):
             return
 
         # clear the contents, open and load the file
-        fh = open(path)
+        fh = open(path, encoding="utf-8")
         try:
             python_script = "".join(fh.readlines())
             index = self.tabs.add_tab(
