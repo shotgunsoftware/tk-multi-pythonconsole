@@ -62,7 +62,7 @@ def test_import_app(set_environment):
 
 def test_create_tab(console_widget):
     """
-    Test that we can create a new python editor tab on the `PythonConsoleWidget`
+    Test that we can create a new python editor tab on the `PythonConsoleWidget`.
     :return:
     """
     console_widget.tabs.add_tab()
@@ -71,7 +71,7 @@ def test_create_tab(console_widget):
 
 def test_remove_tab(console_widget):
     """
-    Test that we can remove a python editor tab on the `PythonConsoleWidget`
+    Test that we can remove a python editor tab on the `PythonConsoleWidget`.
     :return:
     """
     # We should have a fresh console_widget so no tabs will yet be created
@@ -103,7 +103,8 @@ def test_remove_tab(console_widget):
 )
 def test_open_script(console_widget, current_path, script, python_version):
     """
-    Test opening a script in a new tab and ensuring the contents are the same.
+    Test opening a script in a new tab and ensuring the contents of the input widget
+    are the same as the original script.
     :param console_widget:
     :return:
     """
