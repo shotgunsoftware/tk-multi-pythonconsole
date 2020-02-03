@@ -22,7 +22,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 # names should be added below
 
 # add a list of github user names here
-GITHUB_GIST_USERS = ["pscadding"]
+GITHUB_GIST_USERS = []
 
 # github API url
 PUBLIC_GISTS_QUERY_URL = "https://api.github.com/users/%s/gists?access_token=%s"
@@ -105,7 +105,6 @@ class ExternalSources(HookBaseClass):
         """
         Adds a new tab for the supplied gist.
 
-        :param checked: the checked state of the triggering action.
         :param gist: A dictionary with information about a gist.
         """
 
