@@ -144,6 +144,7 @@ def test_execute_script(
     :param console_widget:
     :return:
     """
+    # Check that test's required python version the current version or below.
     if python_version <= sys.version_info.major:
         script = os.path.join(current_path, script)
         console_widget.open(script)
