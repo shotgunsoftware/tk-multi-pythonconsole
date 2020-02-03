@@ -10,6 +10,7 @@
 
 from datetime import datetime
 import os
+import io
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
@@ -237,16 +238,13 @@ class PythonConsoleWidget(QtGui.QWidget):
             return
 
         # clear the contents, open and load the file
-        fh = open(path, encoding="utf-8")
-        try:
+        with io.open(path, "r", encoding="utf-8") as fh:
             python_script = "".join(fh.readlines())
             index = self.tabs.add_tab(
                 name=os.path.split(path)[-1], contents=python_script,
             )
             widget = self.tabs.widget(index)
             widget.input_widget.setPlainText(python_script)
-        finally:
-            fh.close()
 
     def _build_open_file_menu(self):
         """
