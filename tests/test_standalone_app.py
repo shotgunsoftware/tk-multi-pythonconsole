@@ -2,6 +2,7 @@
 import pytest
 import sys
 import os
+import io
 
 
 @pytest.fixture(scope="session")
@@ -120,7 +121,7 @@ def test_open_script(console_widget, current_path, script, python_version):
         # the current python major version.
         widget = console_widget.tabs.widget(0)
         tab_contents = widget.input_widget.toPlainText()
-        with open(script, "r") as f:
+        with io.open(script, "r", encoding="utf-8") as f:
             original_contents = f.read()
 
         assert tab_contents == original_contents
