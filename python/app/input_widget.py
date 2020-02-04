@@ -168,26 +168,32 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # exec the python code, redirecting any stdout to the ouptut signal.
         # also redirect stdin if need be
         if eval_code:
-            with self._stdout_redirect, self._stdin_redirect:
-                try:
-                    # use our copy of locals to allow persistence between executions
-                    results = eval(python_code, globals(), self._locals)
-                except Exception:
-                    # oops, error encountered. write/redirect to the error signal
-                    with self._stderr_redirect as stderr:
-                        stderr.write(self._format_exc())
-                else:
-                    self.results.emit(str(results))
+            # Use two with statements inside each other as python 2.6 doesn't support, passing a tuple
+            # and Python 3 doesn't support contextlib.nested().
+            with self._stdout_redirect:
+                with self._stdin_redirect:
+                    try:
+                        # use our copy of locals to allow persistence between executions
+                        results = eval(python_code, globals(), self._locals)
+                    except Exception:
+                        # oops, error encountered. write/redirect to the error signal
+                        with self._stderr_redirect as stderr:
+                            stderr.write(self._format_exc())
+                    else:
+                        self.results.emit(str(results))
 
         # exec
         else:
-            with self._stdout_redirect, self._stdin_redirect:
-                try:
-                    exec(python_code, globals(), self._locals)
-                except Exception:
-                    # oops, error encountered. write/redirect to the error signal
-                    with self._stderr_redirect as stderr:
-                        stderr.write(self._format_exc())
+            # Use two with statements inside each other as python 2.6 doesn't support, passing a tuple
+            # and Python 3 doesn't support contextlib.nested().
+            with self._stdout_redirect:
+                with self._stdin_redirect:
+                    try:
+                        exec(python_code, globals(), self._locals)
+                    except Exception:
+                        # oops, error encountered. write/redirect to the error signal
+                        with self._stderr_redirect as stderr:
+                            stderr.write(self._format_exc())
 
     def highlight_current_line(self):
         """Highlight the current line of the input widget."""

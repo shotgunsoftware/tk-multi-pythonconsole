@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2016 Shotgun Software Inc.
+#
+# CONFIDENTIAL AND PROPRIETARY
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
+# Source Code License included in this distribution package. See LICENSE.
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
+# not expressly granted therein are reserved by Shotgun Software Inc.
+
 import pytest
 import sys
 import os
@@ -47,9 +57,8 @@ def test_cant_import_sgtk(set_environment):
     make sure we can't import sgtk from tk-core.
     :return:
     """
-    print(sys.path)
     with pytest.raises(ImportError):
-        import sgtk
+        import sgtk  # noqa
 
 
 def test_import_app(set_environment):
@@ -58,7 +67,7 @@ def test_import_app(set_environment):
     There should be no dependency on having sgtk present.
     :return:
     """
-    import app
+    import app  # noqa
 
 
 def test_create_tab(console_widget):
@@ -80,11 +89,11 @@ def test_remove_tab(console_widget):
     # By default the standalone console doesn't have a tab inserted and
     # it is up to the person invoking it to created the first tab.
     # However if you remove the last tab it will automatically create
-    # another tab.
+    # another tab. Create two tabs so that we can test this behavior.
     console_widget.tabs.add_tab()
     console_widget.tabs.add_tab()
     assert console_widget.tabs.count() == 2
-    # Check that when have to tabs and we remove one, we only have one left.
+    # Check that when have two tabs and we remove one, we only have one left.
     console_widget.tabs.remove_tab(0)
     assert console_widget.tabs.count() == 1
     # Check that when we remove the last tab, we still have one tab,
@@ -94,15 +103,14 @@ def test_remove_tab(console_widget):
 
 
 @pytest.mark.parametrize(
-    "script, python_version",
+    "script",
     [
-        ("resource_script.py", 2),
-        # only compare the contents of this one in Python 3
-        ("resource_script_containing_unicode.py", 3),
-        ("resource_script_surrogate_chars.py", 3),
+        ("resource_script.py"),
+        ("resource_script_containing_unicode.py"),
+        ("resource_script_surrogate_chars.py"),
     ],
 )
-def test_open_script(console_widget, current_path, script, python_version):
+def test_open_script(console_widget, current_path, script):
     """
     Test opening a script in a new tab and ensuring the contents of the input widget
     are the same as the original script.
@@ -114,17 +122,16 @@ def test_open_script(console_widget, current_path, script, python_version):
     # make sure it created a new tab for the script
     assert console_widget.tabs.count() == 1
 
-    if python_version <= sys.version_info.major:
-        # Check the contents of the widget.
-        # The contents won't be the same in python 2,
-        # so only tests the files whose python_version is the same or less than
-        # the current python major version.
-        widget = console_widget.tabs.widget(0)
-        tab_contents = widget.input_widget.toPlainText()
-        with io.open(script, "r", encoding="utf-8") as f:
-            original_contents = f.read()
+    # Check the contents of the widget.
+    # The contents won't be the same in python 2,
+    # so only tests the files whose python_version is the same or less than
+    # the current python major version.
+    widget = console_widget.tabs.widget(0)
+    tab_contents = widget.input_widget.toPlainText()
+    with io.open(script, "r", encoding="utf-8") as f:
+        original_contents = f.read()
 
-        assert tab_contents == original_contents
+    assert tab_contents == original_contents
 
 
 @pytest.mark.parametrize(
