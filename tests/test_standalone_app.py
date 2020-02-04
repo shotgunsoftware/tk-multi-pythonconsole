@@ -42,7 +42,7 @@ def imported_app(set_environment):
     import app as console_app
     from app.qt_importer import QtGui
 
-    q_app = QtGui.QApplication([])
+    QtGui.QApplication([])
     return console_app
 
 
