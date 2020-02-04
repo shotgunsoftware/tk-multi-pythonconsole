@@ -138,11 +138,11 @@ def test_open_script(console_widget, current_path, script):
     "script, python_version, expected_output",
     [
         ("resource_script.py", 2, "open script"),
+        # Check that it handles error in an expected way.
+        ("resource_script_error.py", 2, "NameError: name 'b' is not defined"),
         # Only compare the contents of this one in Python 3
         ("resource_script_containing_unicode.py", 3, "›š™º"),
         ("resource_script_surrogate_chars.py", 3, "𐀀𝄞"),
-        # Check that it handles error in an expected way.
-        ("resource_script_error.py", 2, "NameError: name 'b' is not defined"),
     ],
 )
 def test_execute_script(
@@ -154,6 +154,8 @@ def test_execute_script(
     :return:
     """
     # Check that test's required python version the current version or below.
+    # Due to the way the Python 2 handles the unicode, the output will come out differently compared to Python 3.
+    # So we are only checking some of the tests in Python 3.
     if python_version <= sys.version_info.major:
         script = os.path.join(current_path, script)
         console_widget.open(script)
