@@ -168,7 +168,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # exec the python code, redirecting any stdout to the ouptut signal.
         # also redirect stdin if need be
         if eval_code:
-            # Use two with statements inside each other as python 2.6 doesn't support, passing a tuple
+            # Use two with statements inside each other as python 2.6 doesn't support passing a tuple
             # and Python 3 doesn't support contextlib.nested().
             with self._stdout_redirect:
                 with self._stdin_redirect:
@@ -184,7 +184,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         # exec
         else:
-            # Use two with statements inside each other as python 2.6 doesn't support, passing a tuple
+            # Use two with statements inside each other as python 2.6 doesn't support passing a tuple
             # and Python 3 doesn't support contextlib.nested().
             with self._stdout_redirect:
                 with self._stdin_redirect:
