@@ -230,7 +230,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         if self._show_line_numbers:
             digits = math.floor(math.log10(self.blockCount())) + 1
-            return 6 + self.fontMetrics().width("8") * digits
+            return 6 + self.fontMetrics().boundingRect("8").width() * digits
         else:
             return 0
 
