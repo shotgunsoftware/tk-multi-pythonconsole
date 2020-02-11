@@ -11,7 +11,6 @@
 # allow context manager in python 2.5
 from __future__ import with_statement
 
-from contextlib import nested
 import math
 import sys
 import traceback
@@ -20,10 +19,8 @@ import traceback
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
-try:
-    from sgtk.platform.qt import QtCore, QtGui
-except ImportError:
-    from PySide import QtCore, QtGui
+from .qt_importer import QtGui, QtCore
+
 
 from .redirect import StderrRedirector, StdinRedirector, StdoutRedirector
 from .syntax_highlighter import PythonSyntaxHighlighter
@@ -171,26 +168,32 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # exec the python code, redirecting any stdout to the ouptut signal.
         # also redirect stdin if need be
         if eval_code:
-            with nested(self._stdout_redirect, self._stdin_redirect):
-                try:
-                    # use our copy of locals to allow persistence between executions
-                    results = eval(python_code, globals(), self._locals)
-                except Exception:
-                    # oops, error encountered. write/redirect to the error signal
-                    with self._stderr_redirect as stderr:
-                        stderr.write(self._format_exc())
-                else:
-                    self.results.emit(str(results))
+            # Use two with statements inside each other as python 2.6 doesn't support passing a tuple
+            # and Python 3 doesn't support contextlib.nested().
+            with self._stdout_redirect:
+                with self._stdin_redirect:
+                    try:
+                        # use our copy of locals to allow persistence between executions
+                        results = eval(python_code, globals(), self._locals)
+                    except Exception:
+                        # oops, error encountered. write/redirect to the error signal
+                        with self._stderr_redirect as stderr:
+                            stderr.write(self._format_exc())
+                    else:
+                        self.results.emit(str(results))
 
         # exec
         else:
-            with nested(self._stdout_redirect, self._stdin_redirect):
-                try:
-                    exec(python_code, globals(), self._locals)
-                except Exception:
-                    # oops, error encountered. write/redirect to the error signal
-                    with self._stderr_redirect as stderr:
-                        stderr.write(self._format_exc())
+            # Use two with statements inside each other as python 2.6 doesn't support passing a tuple
+            # and Python 3 doesn't support contextlib.nested().
+            with self._stdout_redirect:
+                with self._stdin_redirect:
+                    try:
+                        exec(python_code, globals(), self._locals)
+                    except Exception:
+                        # oops, error encountered. write/redirect to the error signal
+                        with self._stderr_redirect as stderr:
+                            stderr.write(self._format_exc())
 
     def highlight_current_line(self):
         """Highlight the current line of the input widget."""
@@ -227,7 +230,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         if self._show_line_numbers:
             digits = math.floor(math.log10(self.blockCount())) + 1
-            return 6 + self.fontMetrics().width("8") * digits
+            return 6 + self.fontMetrics().boundingRect("8").width() * digits
         else:
             return 0
 
@@ -439,8 +442,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
     def _format_exc(self):
         """Get the latest stack trace and format it for display."""
-        tb = sys.exc_info()[2]
-        return traceback.format_exc(tb)
+        return traceback.format_exc()
 
     def _line_number_area_base_color(self):
         """Get a line number base color."""

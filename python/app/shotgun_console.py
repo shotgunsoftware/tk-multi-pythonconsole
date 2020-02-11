@@ -133,7 +133,11 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         self._settings_manager.store("current_tab", self.tabs.currentIndex(), scope)
 
     def _build_open_file_menu(self):
-        """Dynamcially build the popup menu for the file open/load button."""
+        """
+        Dynamically build the popup menu for the file open/load button.
+        This is called when the menu is triggered via a delayed load.
+        The user must click and hold the open button to trigger the menu building.
+        """
 
         super(ShotgunPythonConsoleWidget, self)._build_open_file_menu()
 

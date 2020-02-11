@@ -10,15 +10,13 @@
 
 from datetime import datetime
 import os
+import io
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
-try:
-    from sgtk.platform.qt import QtCore, QtGui
-except ImportError:
-    from PySide import QtCore, QtGui
+from .qt_importer import QtGui, QtCore
 
 # make sure the images are imported for access to the resources
 from .ui import resources_rc
@@ -99,6 +97,8 @@ class PythonConsoleWidget(QtGui.QWidget):
         in_open_btn.setMaximumSize(QtCore.QSize(30, 30))
         in_open_btn.setObjectName("in_open_btn")
         in_open_btn.setToolTip("Load python script from a file.")
+        # Delayed load of menu.
+        # Click and hold the open button to trigger the menu.
         in_open_btn.setMenu(self._open_file_menu)
         in_open_btn.setPopupMode(QtGui.QToolButton.DelayedPopup)
 
@@ -222,7 +222,9 @@ class PythonConsoleWidget(QtGui.QWidget):
             open_dialog = QtGui.QFileDialog(
                 parent=QtGui.QApplication.activeWindow(),
                 caption="Open Python Script",
-                directory=path,
+                # If this is called form a QAction trigger then the path gets passed the "checked" state of the action.
+                # We should treat this as if no Path has been passed.
+                directory=path if type(path) is str else "",
                 filter="*.py",
             )
             open_dialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -236,19 +238,23 @@ class PythonConsoleWidget(QtGui.QWidget):
             return
 
         # clear the contents, open and load the file
-        fh = open(path)
-        try:
+        # Use io.open() instead of open() so that we can provide the encoding to use for python 2.6 > 2.7.
+        # Python 3 supports passing the encoding to open().
+        # FIXME: Using the encoding option makes things better but not perfect for unicode strings.
+        with io.open(path, "r", encoding="utf-8") as fh:
             python_script = "".join(fh.readlines())
             index = self.tabs.add_tab(
                 name=os.path.split(path)[-1], contents=python_script,
             )
             widget = self.tabs.widget(index)
             widget.input_widget.setPlainText(python_script)
-        finally:
-            fh.close()
 
     def _build_open_file_menu(self):
-        """Dynamcially build the popup menu for the file open/load button."""
+        """
+        Dynamically build the popup menu for the file open/load button.
+        This is called when the menu is triggered via a delayed load.
+        The user must click and hold the open button to trigger the menu building.
+        """
 
         self._open_file_menu.clear()
         self._open_file_menu.addAction(self._open_file_action)

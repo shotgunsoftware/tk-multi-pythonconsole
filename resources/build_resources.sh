@@ -20,11 +20,14 @@ for f in *.png; do mogrify $f; done
 function build_qt {
     echo " > Building " $2
 
-    # compile ui to python
+    # Compile ui to python
     $1 $2 > $UI_PYTHON_PATH/$3.py
 
-    # replace PySide imports with tank.platform.qt and remove line containing Created by date
-    sed -i "" -e "s/\(from PySide import \(.*\)\)/try:\n    from tank.platform.qt import \2\nexcept ImportError:\n    \1/g" -e "/# Created:/d" $UI_PYTHON_PATH/$3.py
+    # Replace PySide imports with tank.platform.qt and remove line containing Created by date
+    # On OSX sed doesn't interpret \n as a new line. Instead we must insert the new line string
+    lf=$'\n'
+
+    sed -i "" -e "s/\(from PySide import \(.*\)\)/try:\\$lf    from sgtk.platform.qt import \2\\$lf\except ImportError:\\$lf    try:\\$lf        from PySide2 import \2\\$lf    except ImportError:\\$lf        \1/g" -e "/# Created:/d" $UI_PYTHON_PATH/$3.py
     # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
     # stand alone fashion. This try/except allows portions of the console to be imported outside of a
     # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
@@ -36,7 +39,7 @@ function build_ui {
 }
 
 function build_res {
-    build_qt "pyside-rcc" "$1.qrc" "$1_rc"
+    build_qt "pyside-rcc -py3" "$1.qrc" "$1_rc"
 }
 
 

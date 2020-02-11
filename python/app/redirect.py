@@ -14,10 +14,8 @@ import sys
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
-try:
-    from sgtk.platform.qt import QtCore, QtGui
-except ImportError:
-    from PySide import QtCore, QtGui
+
+from .qt_importer import QtCore
 
 
 class StdinRedirector(QtCore.QObject):
@@ -101,9 +99,6 @@ class StdoutRedirector(QtCore.QObject):
 
         If tee, then also write to stdout.
         """
-        if isinstance(msg, unicode):
-            msg = unicode.encode(msg, "utf-8")
-
         self.output.emit(msg)
         QtCore.QCoreApplication.processEvents()
 
@@ -155,9 +150,6 @@ class StderrRedirector(QtCore.QObject):
 
         If tee, then also write to stderr.
         """
-        if isinstance(msg, unicode):
-            msg = unicode.encode(msg, "utf-8")
-
         self.error.emit(msg)
         QtCore.QCoreApplication.processEvents()
 

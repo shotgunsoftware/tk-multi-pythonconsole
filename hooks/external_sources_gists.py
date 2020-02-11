@@ -10,10 +10,10 @@
 
 import json
 import os
-import urllib2
 
 import sgtk
 from sgtk.platform.qt import QtGui
+from tank_vendor.six.moves import urllib
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -93,7 +93,10 @@ class ExternalSources(HookBaseClass):
             for gist in gists:
 
                 gist_action = QtGui.QAction(gist["file_name"], gist_user_menu)
-                gist_action.triggered.connect(lambda g=gist: self._add_gist_tab(g))
+                # PySide2 seems to pass the checked state through as an args instead of a kwarg
+                # so we need to provide a kwarg for it to pass the check state without overriding the gist value.
+                add_gist = lambda checked=False, g=gist: self._add_gist_tab(g)
+                gist_action.triggered.connect(add_gist)
                 gist_user_menu.addAction(gist_action)
 
         return gists_menu.menuAction()
@@ -102,13 +105,13 @@ class ExternalSources(HookBaseClass):
         """
         Adds a new tab for the supplied gist.
 
-        :param gist: A dictionary with information about a gist
+        :param gist: A dictionary with information about a gist.
         """
 
         name = gist["file_name"]
 
         try:
-            contents = urllib2.urlopen(gist["file_url"]).read()
+            contents = urllib.request.urlopen(gist["file_url"]).read()
         except Exception:
             contents = "# Unable to load gist contents... :("
 
@@ -132,7 +135,7 @@ def get_gists(username, app):
 
     url = PUBLIC_GISTS_QUERY_URL % (username, os.environ["GITHUB_OAUTH_TOKEN"])
     try:
-        data = json.load(urllib2.urlopen(url))
+        data = json.load(urllib.request.urlopen(url))
     except Exception:
         data = {}
 
@@ -152,13 +155,15 @@ def get_gists(username, app):
             continue
 
         # only return gists with 1 file (don't know how to handle more yet)
-        if len(file_data.keys()) != 1:
+        if len(file_data) != 1:
             app.log_debug(
                 "Found gist with multiple files. Don't know how to handle that yet."
             )
             continue
 
-        file_info = file_data[file_data.keys()[0]]
+        # since the dictionary only contains one key value pair,
+        # just extract the first and only one.
+        file_info = list(file_data.values())[0]
 
         file_url = file_info.get("raw_url")
         if not file_url:
