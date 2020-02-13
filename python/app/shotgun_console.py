@@ -19,6 +19,7 @@ settings = sgtk.platform.import_framework("tk-framework-shotgunutils", "settings
 
 from .console import PythonConsoleWidget
 
+
 class ShotgunPythonConsoleWidget(PythonConsoleWidget):
     """A dockable, interactive, Shotgun-aware python console widget.
 
@@ -47,7 +48,8 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         # if not running in an engine, then we're hosed
         if not engine:
             raise TankError(
-                "Unable to initialize ShotgunPythonConsole. No engine running")
+                "Unable to initialize ShotgunPythonConsole. No engine running"
+            )
 
         # add a welcome message to the output widget
         welcome_message = (
@@ -60,12 +62,14 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
             % (sys.version,)
         )
 
-        add_sg_globals = lambda i: \
-            self.tabs.widget(i).input_widget.add_globals(self._get_sg_globals())
+        add_sg_globals = lambda i: self.tabs.widget(i).input_widget.add_globals(
+            self._get_sg_globals()
+        )
 
         # lambda to add the welcome message to a tab at a given index
-        add_welcome_msg = lambda i: \
-            self.tabs.widget(i).output_widget.add_input(welcome_message, prefix=None)
+        add_welcome_msg = lambda i: self.tabs.widget(i).output_widget.add_input(
+            welcome_message, prefix=None
+        )
 
         # set globals as new tabs are created
         self.tabs.tab_added.connect(add_sg_globals)
@@ -129,7 +133,11 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         self._settings_manager.store("current_tab", self.tabs.currentIndex(), scope)
 
     def _build_open_file_menu(self):
-        """Dynamcially build the popup menu for the file open/load button."""
+        """
+        Dynamically build the popup menu for the file open/load button.
+        This is called when the menu is triggered via a delayed load.
+        The user must click and hold the open button to trigger the menu building.
+        """
 
         super(ShotgunPythonConsoleWidget, self)._build_open_file_menu()
 

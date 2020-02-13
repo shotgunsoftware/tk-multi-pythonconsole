@@ -1,23 +1,22 @@
 # Copyright (c) 2016 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from datetime import datetime
 import os
+import io
+
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
-try:
-    from sgtk.platform.qt import QtCore, QtGui
-except ImportError:
-    from PySide import QtCore, QtGui
+from .qt_importer import QtGui, QtCore
 
 # make sure the images are imported for access to the resources
 from .ui import resources_rc
@@ -98,12 +97,16 @@ class PythonConsoleWidget(QtGui.QWidget):
         in_open_btn.setMaximumSize(QtCore.QSize(30, 30))
         in_open_btn.setObjectName("in_open_btn")
         in_open_btn.setToolTip("Load python script from a file.")
+        # Delayed load of menu.
+        # Click and hold the open button to trigger the menu.
         in_open_btn.setMenu(self._open_file_menu)
         in_open_btn.setPopupMode(QtGui.QToolButton.DelayedPopup)
 
         # reusable action for opening from disk
         open_file_icon = QtGui.QIcon(":/tk_multi_pythonconsole/open.png")
-        self._open_file_action = QtGui.QAction(open_file_icon, "Load from disk...", self)
+        self._open_file_action = QtGui.QAction(
+            open_file_icon, "Load from disk...", self
+        )
         self._open_file_action.triggered.connect(self.open)
 
         # save file
@@ -118,7 +121,9 @@ class PythonConsoleWidget(QtGui.QWidget):
         self._in_exec_btn.setMinimumSize(QtCore.QSize(30, 30))
         self._in_exec_btn.setMaximumSize(QtCore.QSize(30, 30))
         self._in_exec_btn.setObjectName("in_exec_btn")
-        self._in_exec_btn.setToolTip("Execute the current python script. Shortcut: Ctrl+Enter")
+        self._in_exec_btn.setToolTip(
+            "Execute the current python script. Shortcut: Ctrl+Enter"
+        )
 
         # add tab
         add_tab_btn = QtGui.QToolButton(self)
@@ -144,7 +149,9 @@ class PythonConsoleWidget(QtGui.QWidget):
         in_btn_box.addWidget(add_tab_btn)
         in_btn_box.addSpacing(4)
 
-        in_btn_box.setAlignment(add_tab_btn, QtCore.Qt.AlignVCenter | QtCore.Qt.AlignCenter)
+        in_btn_box.setAlignment(
+            add_tab_btn, QtCore.Qt.AlignVCenter | QtCore.Qt.AlignCenter
+        )
 
         button_layout = QtGui.QVBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
@@ -168,27 +175,33 @@ class PythonConsoleWidget(QtGui.QWidget):
 
         # buttons clicked
         out_clear_btn.clicked.connect(
-            lambda: self._cur_tab_widget().output_widget.clear())
+            lambda: self._cur_tab_widget().output_widget.clear()
+        )
 
         self._in_save_btn.clicked.connect(
-            lambda: self._cur_tab_widget().input_widget.save())
+            lambda: self._cur_tab_widget().input_widget.save()
+        )
 
         in_open_btn.clicked.connect(self.open)
 
         in_clear_btn.clicked.connect(
-            lambda: self._cur_tab_widget().input_widget.clear())
+            lambda: self._cur_tab_widget().input_widget.clear()
+        )
 
         self._in_exec_btn.clicked.connect(
-            lambda: self._cur_tab_widget().input_widget.execute())
+            lambda: self._cur_tab_widget().input_widget.execute()
+        )
 
         add_tab_btn.clicked.connect(self.tabs.add_tab)
 
         # toggles
         self._out_echo_btn.toggled.connect(
-            lambda t: self._cur_tab_widget().input_widget.toggle_echo(t))
+            lambda t: self._cur_tab_widget().input_widget.toggle_echo(t)
+        )
 
         self._line_num_btn.toggled.connect(
-            lambda t: self._cur_tab_widget().input_widget.toggle_line_numbers(t))
+            lambda t: self._cur_tab_widget().input_widget.toggle_line_numbers(t)
+        )
 
         self.tabs.input_text_changed.connect(self._check_button_state)
         self.tabs.currentChanged.connect(self._check_button_state)
@@ -209,7 +222,9 @@ class PythonConsoleWidget(QtGui.QWidget):
             open_dialog = QtGui.QFileDialog(
                 parent=QtGui.QApplication.activeWindow(),
                 caption="Open Python Script",
-                directory=path,
+                # If this is called form a QAction trigger then the path gets passed the "checked" state of the action.
+                # We should treat this as if no Path has been passed.
+                directory=path if type(path) is str else "",
                 filter="*.py",
             )
             open_dialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -223,24 +238,26 @@ class PythonConsoleWidget(QtGui.QWidget):
             return
 
         # clear the contents, open and load the file
-        fh = open(path)
-        try:
+        # Use io.open() instead of open() so that we can provide the encoding to use for python 2.6 > 2.7.
+        # Python 3 supports passing the encoding to open().
+        # FIXME: Using the encoding option makes things better but not perfect for unicode strings.
+        with io.open(path, "r", encoding="utf-8") as fh:
             python_script = "".join(fh.readlines())
             index = self.tabs.add_tab(
-                name=os.path.split(path)[-1],
-                contents=python_script,
+                name=os.path.split(path)[-1], contents=python_script,
             )
             widget = self.tabs.widget(index)
             widget.input_widget.setPlainText(python_script)
-        finally:
-            fh.close()
 
     def _build_open_file_menu(self):
-        """Dynamcially build the popup menu for the file open/load button."""
+        """
+        Dynamically build the popup menu for the file open/load button.
+        This is called when the menu is triggered via a delayed load.
+        The user must click and hold the open button to trigger the menu building.
+        """
 
         self._open_file_menu.clear()
         self._open_file_menu.addAction(self._open_file_action)
-
 
     def _check_button_state(self):
         """
@@ -294,8 +311,9 @@ class PythonTabWidget(QtGui.QTabWidget):
 
         # ---- connect signals
 
-        self._emit_current_input_text = lambda: \
-            self.input_text_changed.emit(self.currentWidget().input_widget.toPlainText())
+        self._emit_current_input_text = lambda: self.input_text_changed.emit(
+            self.currentWidget().input_widget.toPlainText()
+        )
         self.tabCloseRequested.connect(self.remove_tab)
 
         # watch for double click events on the tabbar
@@ -342,7 +360,9 @@ class PythonTabWidget(QtGui.QTabWidget):
 
         # adds a timestamp
         time_stamp = datetime.now().strftime("%x %X")
-        widget.output_widget.add_input("---- [Tab created %s] ----\n\n" % (time_stamp,), prefix="")
+        widget.output_widget.add_input(
+            "---- [Tab created %s] ----\n\n" % (time_stamp,), prefix=""
+        )
 
         # TODO: do something with the description
 
@@ -371,10 +391,12 @@ class PythonTabWidget(QtGui.QTabWidget):
 
         for index in range(0, self.count()):
             widget = self.widget(index)
-            tab_info.append({
-                "tab_name": self.tabText(index),
-                "tab_contents": widget.input_widget.toPlainText(),
-            })
+            tab_info.append(
+                {
+                    "tab_name": self.tabText(index),
+                    "tab_contents": widget.input_widget.toPlainText(),
+                }
+            )
 
         return tab_info
 
@@ -430,10 +452,7 @@ class PythonTabWidget(QtGui.QTabWidget):
         Shows a dialog prompt for tab renaming.
         """
 
-        dialog = QtGui.QInputDialog(
-            parent=self,
-            flags=QtCore.Qt.FramelessWindowHint
-        )
+        dialog = QtGui.QInputDialog(parent=self, flags=QtCore.Qt.FramelessWindowHint)
         dialog.setLabelText("New Tab Name:")
         dialog.adjustSize()
 
@@ -442,7 +461,9 @@ class PythonTabWidget(QtGui.QTabWidget):
         dialog.resize(self.width(), dialog.height())
         dialog.move(
             self.mapToGlobal(self.rect().topLeft()).x(),
-            self.mapToGlobal(self.rect().bottomLeft()).y() - dialog.height() - self.tabBar().height()
+            self.mapToGlobal(self.rect().bottomLeft()).y()
+            - dialog.height()
+            - self.tabBar().height(),
         )
 
         if dialog.exec_() == QtGui.QDialog.Accepted:
@@ -484,7 +505,8 @@ class _PythonConsoleSplitter(QtGui.QSplitter):
         self.addWidget(input_widgets)
 
         self.input_widget.cursor_column_changed.connect(
-            self.info_widget.set_current_column)
+            self.info_widget.set_current_column
+        )
 
 
 class _PythonInputInfoWidget(QtGui.QWidget):
@@ -510,8 +532,7 @@ class _PythonInputInfoWidget(QtGui.QWidget):
         layout.addWidget(self._column_lbl)
 
         self._text_grey = colorize(
-            self.palette().window().color(), 1,
-            self.palette().windowText().color(), 1,
+            self.palette().window().color(), 1, self.palette().windowText().color(), 1,
         ).name()
 
     def set_current_column(self, col):
@@ -521,8 +542,5 @@ class _PythonInputInfoWidget(QtGui.QWidget):
         :param int col: The column number to display.
         """
         self._column_lbl.setText(
-            "<font color='%s'>col: %s</font>" % (
-                self._text_grey,
-                str(col),
-            )
+            "<font color='%s'>col: %s</font>" % (self._text_grey, str(col),)
         )

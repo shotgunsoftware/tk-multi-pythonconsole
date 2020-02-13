@@ -8,31 +8,38 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import __builtin__
 import keyword as py_keywords
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
+from .qt_importer import QtCore, QtGui
+
 try:
-    from sgtk.platform.qt import QtCore, QtGui
+    from tank_vendor.six.moves import builtins
 except ImportError:
-    from PySide import QtCore, QtGui
+    import sys
+
+    if sys.version_info.major == 2:
+        import __builtin__ as builtins
+    elif sys.version_info.major == 3:
+        import builtins
 
 from .util import colorize
 
 # based on: https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting
 
-def _format(color, style=''):
+
+def _format(color, style=""):
     """Return a QtGui.QTextCharFormat with the given attributes.
     """
 
     _format = QtGui.QTextCharFormat()
     _format.setForeground(color)
-    if 'bold' in style:
+    if "bold" in style:
         _format.setFontWeight(QtGui.QFont.Bold)
-    if 'italic' in style:
+    if "italic" in style:
         _format.setFontItalic(True)
 
     return _format
@@ -41,29 +48,53 @@ def _format(color, style=''):
 class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     """Syntax highlighter for the Python language."""
 
-
     # Python keywords
     keywords = py_keywords.kwlist
 
     # Python builtins
-    builtins = dir(__builtin__)
+    builtins = dir(builtins)
 
     # Python operators
     operators = [
-        '=',
+        r"=",
         # Comparison
-        '==', '!=', '<', '<=', '>', '>=',
+        r"==",
+        r"!=",
+        r"<",
+        r"<=",
+        r">",
+        r">=",
         # Arithmetic
-        '\+', '-', '\*', '/', '//', '\%', '\*\*',
+        r"\+",
+        r"-",
+        r"\*",
+        r"/",
+        r"//",
+        r"\%",
+        r"\*\*",
         # In-place
-        '\+=', '-=', '\*=', '/=', '\%=',
+        r"\+=",
+        r"-=",
+        r"\*=",
+        r"/=",
+        r"\%=",
         # Bitwise
-        '\^', '\|', '\&', '\~', '>>', '<<',
+        r"\^",
+        r"\|",
+        r"\&",
+        r"\~",
+        r">>",
+        r"<<",
     ]
 
     # Python braces
     braces = [
-        '\{', '\}', '\(', '\)', '\[', '\]',
+        r"\{",
+        r"\}",
+        r"\(",
+        r"\)",
+        r"\[",
+        r"\]",
     ]
 
     def __init__(self, document, palette):
@@ -80,115 +111,99 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         rules = []
 
         # Keyword, operator, and brace rules
-        rules += [(r'\b%s\b' % w, 0, self._style("keyword"))
-            for w in PythonSyntaxHighlighter.keywords]
-        rules += [(r'\b%s\b' % w, 0, self._style("builtin"))
-            for w in PythonSyntaxHighlighter.builtins]
-        rules += [(r'%s' % o, 0, self._style("operator"))
-            for o in PythonSyntaxHighlighter.operators]
-        rules += [(r'%s' % b, 0, self._style("brace"))
-            for b in PythonSyntaxHighlighter.braces]
+        rules += [
+            (r"\b%s\b" % w, 0, self._style("keyword"))
+            for w in PythonSyntaxHighlighter.keywords
+        ]
+        rules += [
+            (r"\b%s\b" % w, 0, self._style("builtin"))
+            for w in PythonSyntaxHighlighter.builtins
+        ]
+        rules += [
+            (r"%s" % o, 0, self._style("operator"))
+            for o in PythonSyntaxHighlighter.operators
+        ]
+        rules += [
+            (r"%s" % b, 0, self._style("brace")) for b in PythonSyntaxHighlighter.braces
+        ]
 
         # All other rules
         rules += [
             # 'self'
-            (r'\bself\b', 0, self._style("self")),
-
+            (r"\bself\b", 0, self._style("self")),
             # Double-quoted string, possibly containing escape sequences
             (r'"[^"\\]*(\\.[^"\\]*)*"', 0, self._style("string")),
             # Single-quoted string, possibly containing escape sequences
             (r"'[^'\\]*(\\.[^'\\]*)*'", 0, self._style("string")),
-
             # 'def' followed by an identifier
-            (r'\bdef\b\s*(\w+)', 1, self._style("defclass")),
+            (r"\bdef\b\s*(\w+)", 1, self._style("defclass")),
             # 'class' followed by an identifier
-            (r'\bclass\b\s*(\w+)', 1, self._style("defclass")),
-
+            (r"\bclass\b\s*(\w+)", 1, self._style("defclass")),
             # From '#' until a newline
-            (r'#[^\n]*', 0, self._style("comment")),
-
+            (r"#[^\n]*", 0, self._style("comment")),
             # Numeric literals
-            (r'\b[+-]?[0-9]+[lL]?\b', 0, self._style("numbers")),
-            (r'\b[+-]?0[xX][0-9A-Fa-f]+[lL]?\b', 0, self._style("numbers")),
-            (r'\b[+-]?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b', 0, self._style("numbers")),
+            (r"\b[+-]?[0-9]+[lL]?\b", 0, self._style("numbers")),
+            (r"\b[+-]?0[xX][0-9A-Fa-f]+[lL]?\b", 0, self._style("numbers")),
+            (
+                r"\b[+-]?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b",
+                0,
+                self._style("numbers"),
+            ),
         ]
 
         # Build a QtCore.QRegExp for each pattern
-        self.rules = [(QtCore.QRegExp(pat), index, fmt)
-            for (pat, index, fmt) in rules]
+        self.rules = [(QtCore.QRegExp(pat), index, fmt) for (pat, index, fmt) in rules]
 
     def _style(self, style_type):
 
         palette = self._palette
 
         styles = {
-            'keyword': _format(
+            "keyword": _format(
+                colorize(palette.windowText().color(), 3, QtGui.QColor(0, 0, 255), 1,),
+                style="",
+            ),
+            "builtin": _format(
+                colorize(palette.windowText().color(), 3, QtGui.QColor(0, 255, 0), 1,),
+                style="",
+            ),
+            "operator": _format(
                 colorize(
-                    palette.windowText().color(), 3,
-                    QtGui.QColor(0, 0, 255), 1,
+                    palette.windowText().color(), 4, palette.highlight().color(), 2,
                 ),
                 style="",
             ),
-            'builtin': _format(
-                colorize(
-                    palette.windowText().color(), 3,
-                    QtGui.QColor(0, 255, 0), 1,
-                ),
-                style="",
+            "brace": _format(
+                colorize(palette.windowText().color(), 2, palette.base().color(), 1,),
+                style="bold",
             ),
-            'operator': _format(
-                colorize(
-                    palette.windowText().color(), 4,
-                    palette.highlight().color(), 2,
-                ),
-                style="",
+            "defclass": _format(
+                colorize(palette.windowText().color(), 3, QtGui.QColor(255, 0, 0), 1,),
+                style="bold",
             ),
-            'brace':_format(
+            "string": _format(
                 colorize(
-                    palette.windowText().color(), 2,
-                    palette.base().color(), 1,
+                    palette.windowText().color(), 2, palette.highlight().color(), 1,
                 ),
                 style="bold",
             ),
-            'defclass':_format(
-                colorize(
-                    palette.windowText().color(), 3,
-                    QtGui.QColor(255, 0, 0), 1,
-                ),
-                style="bold",
-            ),
-            'string': _format(
-                colorize(
-                    palette.windowText().color(), 2,
-                    palette.highlight().color(), 1,
-                ),
-                style="bold",
-            ),
-            'string2': _format(
-                colorize(
-                    palette.windowText().color(), 1,
-                    palette.base().color(), 1,
-                ),
+            "string2": _format(
+                colorize(palette.windowText().color(), 1, palette.base().color(), 1,),
                 style="",
             ),
-            'comment':_format(
-                colorize(
-                    palette.windowText().color(), 1,
-                    palette.base().color(), 2,
-                ),
+            "comment": _format(
+                colorize(palette.windowText().color(), 1, palette.base().color(), 2,),
                 style="italic",
             ),
-            'self': _format(
+            "self": _format(
                 colorize(
-                    palette.windowText().color(), 1,
-                    QtGui.QColor(127, 127, 127), 1,
+                    palette.windowText().color(), 1, QtGui.QColor(127, 127, 127), 1,
                 ),
-                 style="",
+                style="",
             ),
-            'numbers': _format(
+            "numbers": _format(
                 colorize(
-                    palette.windowText().color(), 3,
-                    QtGui.QColor(127, 127, 127), 1,
+                    palette.windowText().color(), 3, QtGui.QColor(127, 127, 127), 1,
                 ),
                 style="",
             ),
@@ -216,7 +231,6 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         in_multiline = self.match_multiline(text, *self.tri_single)
         if not in_multiline:
             in_multiline = self.match_multiline(text, *self.tri_double)
-
 
     def match_multiline(self, text, delimiter, in_state, style):
         """Do highlighting of multi-line strings. ``delimiter`` should be a
@@ -257,6 +271,3 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             return True
         else:
             return False
-
-
-

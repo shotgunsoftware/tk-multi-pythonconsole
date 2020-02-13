@@ -12,10 +12,7 @@
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
-try:
-    from sgtk.platform.qt import QtGui
-except ImportError:
-    from PySide import QtGui
+from .qt_importer import QtGui
 
 
 def colorize(c1, c1_strength, c2, c2_strength):

@@ -8,21 +8,35 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import cgi
 from datetime import datetime
 import os
+import sys
 from threading import Lock
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
+
+if sys.version_info.major == 2:
+    from cgi import escape
+elif sys.version_info.major == 3:
+    from html import escape as escape
+
+from .qt_importer import QtCore, QtGui
+
 try:
     import sgtk
-    from sgtk.platform.qt import QtCore, QtGui
 except ImportError:
     sgtk = None
-    from PySide import QtCore, QtGui
+
+try:
+    from tank_vendor import six
+except ImportError:
+    try:
+        import six
+    except ImportError:
+        six = None
 
 from .util import colorize
 
@@ -115,7 +129,12 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
         """
 
-        text = str(text)
+        if six:
+            # if six can be imported sanitize the string.
+            # This may lead to unicode errors if not imported in python 2
+            text = six.ensure_str(text)
+        else:
+            str(text)
 
         with self._write_lock:
             text = self._to_html(text)
@@ -138,7 +157,12 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         if sgtk:
             sgtk.platform.current_engine().log_error(text)
 
-        text = str(text)
+        if six:
+            # if six can be imported sanitize the string.
+            # This may lead to unicode errors if not imported in python 2
+            text = six.ensure_str(text)
+        else:
+            str(text)
 
         # write the error
         with self._write_lock:
@@ -156,11 +180,10 @@ class OutputStreamWidget(QtGui.QTextBrowser):
     def _input_text_color(self):
         """The input text color."""
 
-        if not hasattr(self, '_input_color'):
+        if not hasattr(self, "_input_color"):
 
             self._input_color = colorize(
-                self.palette().base().color(), 1,
-                QtGui.QColor(127, 127, 127), 2,
+                self.palette().base().color(), 1, QtGui.QColor(127, 127, 127), 2,
             )
 
         return self._input_color
@@ -168,19 +191,16 @@ class OutputStreamWidget(QtGui.QTextBrowser):
     def _error_text_color(self):
         """The error text color."""
 
-        if not hasattr(self, '_err_color'):
+        if not hasattr(self, "_err_color"):
 
-            self._err_color = colorize(
-                self.textColor(), 1,
-                QtGui.QColor(255, 0, 0), 3,
-            )
+            self._err_color = colorize(self.textColor(), 1, QtGui.QColor(255, 0, 0), 3,)
 
         return self._err_color
 
     def _to_html(self, text, color=None):
         """Attempt to properly escape and color text for display."""
 
-        text = cgi.escape(text)
+        text = escape(text)
         text = text.replace(" ", "&nbsp;")
         text = text.replace("\n", "<br />")
 
@@ -229,7 +249,9 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         QWidget {
             font-size: %spt;
         }
-        """ % (size,)
+        """ % (
+            size,
+        )
         self.setStyleSheet(style)
 
     def zoom_in(self):
@@ -243,4 +265,3 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         Zoom out on the text.
         """
         self.zoom(-1)
-

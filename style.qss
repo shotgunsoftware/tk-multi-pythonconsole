@@ -28,7 +28,7 @@ _LineNumberArea {
 /* Main tab section                                             */
 
 QTabWidget::pane {
-    border-bottom : 1px solid rgb(255, 255, 255, 20);
+    border-bottom : 1px solid rgba(255, 255, 255, 20);
     padding-bottom: 2px;
 }
 
@@ -39,7 +39,7 @@ QTabBar::tab {
     padding-right: 12px;
     padding-top: 4px;
     padding-bottom: 2px;
-    border-top: 2px solid rgb(255, 255, 255, 5);
+    border-top: 2px solid rgba(255, 255, 255, 0);
 }
 
 QTabBar::tab:hover {
@@ -288,4 +288,3 @@ QToolButton#add_tab_btn {
 QToolButton:hover#add_tab_btn {
     background-image: url(:/tk_multi_pythonconsole/add.png);
 }
-
