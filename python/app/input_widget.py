@@ -57,9 +57,9 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # local symbol table for this input widget.
         # match what dunders appear in an interactive python shell
         self._locals = {
-            '__name__': '__main__',
-            '__doc__': None,
-            '__package__': None,
+            "__name__": "__main__",
+            "__doc__": None,
+            "__package__": None,
         }
         self._echo = True
         self._show_line_numbers = True
