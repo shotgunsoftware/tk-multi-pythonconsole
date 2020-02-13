@@ -55,7 +55,12 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         super(PythonInputWidget, self).__init__(parent)
 
         # local symbol table for this input widget.
-        self._locals = {}
+        # match what dunders appear in an interactive python shell
+        self._locals = {
+            "__name__": "__main__",
+            "__doc__": None,
+            "__package__": None,
+        }
         self._echo = True
         self._show_line_numbers = True
 
@@ -117,11 +122,10 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
     def add_globals(self, new_globals):
         """
-        Updates ``globals()`` with the supplied values.
+        Updates global variables with the supplied values.
         """
 
-        globals_dict = globals()
-        globals_dict.update(new_globals)
+        self._locals.update(new_globals)
 
     def execute(self):
         """Execute the contents of the input widget."""
@@ -173,8 +177,18 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             with self._stdout_redirect:
                 with self._stdin_redirect:
                     try:
-                        # use our copy of locals to allow persistence between executions
-                        results = eval(python_code, globals(), self._locals)
+                        # Use our copy of locals to allow persistence between executions
+                        # We provide the locals dict as both the global and local scopes
+                        # So that any methods executed in the python console can access the top
+                        # level/global variables.
+                        # example:
+                        # a = "hello"
+                        # def do_something():
+                        #     print(a)
+                        # do_something()
+                        #
+                        # The above would fail if we don't provide the same dictionary for both scopes.
+                        results = eval(python_code, self._locals, self._locals)
                     except Exception:
                         # oops, error encountered. write/redirect to the error signal
                         with self._stderr_redirect as stderr:
@@ -189,7 +203,9 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             with self._stdout_redirect:
                 with self._stdin_redirect:
                     try:
-                        exec(python_code, globals(), self._locals)
+                        # locals gets passed in as both global and locals to fix look up issues.
+                        # See example above in the if eval_code true block.
+                        exec(python_code, self._locals, self._locals)
                     except Exception:
                         # oops, error encountered. write/redirect to the error signal
                         with self._stderr_redirect as stderr:
