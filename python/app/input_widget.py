@@ -248,10 +248,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             super(PythonInputWidget, self).keyPressEvent(event)
 
     def _set_indentation(self, unindent=False):
-
-        # FIXME: bug if you unindent on thee first line, causes the app to hang
-        # FIXME: bug if you unindent without block selecting and you cursor is at the beginning of the line, it will
-        # shift on the previous line.
         def unindent_line(line):
             if line.startswith("    "):
                 return line[4:]
@@ -318,7 +314,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             # Move to the end of the line before checking, so that we can be sure the cursor cannot be on the
             # same line but before the start point.
             cur.movePosition(QtGui.QTextCursor.EndOfLine)
-            if cur.position() < start:
+            if cur.position() < start or beginning_of_line_pos == 0:
                 # We've moved a line above the start of the selection
                 if line != altered_line:
                     if unindent:
@@ -329,6 +325,11 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                         new_start_pos = (
                             new_start_pos
                             if new_start_pos >= beginning_of_line_pos
+                            else beginning_of_line_pos
+                        )
+                        new_end_pos = (
+                            new_end_pos
+                            if new_end_pos >= beginning_of_line_pos
                             else beginning_of_line_pos
                         )
                     else:
@@ -342,7 +343,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # Restore the selection, but alter it so that it is relative to the changes we made.
         if cur_pos > anchor:
             cur.setPosition(new_start_pos)
-            # if cur_pos != anchor:
             cur.setPosition(new_end_pos, QtGui.QTextCursor.KeepAnchor)
         else:
             cur.setPosition(new_end_pos)
