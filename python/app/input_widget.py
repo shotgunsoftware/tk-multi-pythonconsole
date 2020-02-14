@@ -248,6 +248,10 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             super(PythonInputWidget, self).keyPressEvent(event)
 
     def _set_indentation(self, unindent=False):
+
+        # FIXME: bug if you unindent on thee first line, causes the app to hang
+        # FIXME: bug if you unindent without block selecting and you cursor is at the beginning of the line, it will
+        # shift on the previous line.
         def unindent_line(line):
             if line.startswith("    "):
                 return line[4:]
