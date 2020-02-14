@@ -234,12 +234,118 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         ]:
             self.insertPlainText("\n")
             event.accept()
+        elif event.key() == QtCore.Qt.Key_Slash:
+            print("comment")
+        elif event.key() == QtCore.Qt.Key_Backtab:
+            # Unindent the code.
+            self._set_indentation(unindent=True)
+            event.accept()
         elif event.key() == QtCore.Qt.Key_Tab:
             # intercept the tab key and insert 4 spaces
-            self.insertPlainText("    ")
+            self._set_indentation()
             event.accept()
         else:
             super(PythonInputWidget, self).keyPressEvent(event)
+
+    def _set_indentation(self, unindent=False):
+        def unindent_line(line):
+            if line.startswith("    "):
+                return line[4:]
+            elif line.startswith("\t"):
+                return line[2:]
+            return line
+
+        cur = self.textCursor()
+
+        cur_pos = cur.position()  # Where a selection ends
+        anchor = cur.anchor()  # Where a selection starts (can be the same as above)
+
+        # Since the anchor and the cursor position can be higher or lower in position than each other
+        # depending on which direction you selected the text, you should mark the position of the start and end
+        # with the start being the lowest position and the end being the highest position.
+        start = cur_pos if cur_pos < anchor else anchor
+        end = cur_pos if cur_pos > anchor else anchor
+
+        # mark the beginning of the block edit and mark the end after the unindent changes so they are recorded as a
+        # single undo step.
+        cur.beginEditBlock()
+
+        cur.setPosition(end)
+
+        new_start_pos = start
+        new_end_pos = end
+
+        in_selection = True
+        # Loop over the lines from the bottom up and un-indent them
+        while in_selection:
+            # Jump to the end the end of the line, with both the cursor and the anchor
+            cur.movePosition(QtGui.QTextCursor.EndOfLine)
+            # Get the text for the block and perform the unindent
+            # It appears that a block in our situation represents a line. However if this turns out not to be the case
+            # Then we should change this to select the line and then grab the selected text.
+            line = cur.block().text()
+            if unindent:
+                altered_line = unindent_line(line)
+            else:
+                altered_line = "    " + line
+
+            if line != altered_line:
+                # The line must have had it's indentation changed, so record an updated end position
+                if unindent:
+                    new_end_pos -= len(line) - len(altered_line)
+                else:
+                    new_end_pos += len(altered_line) - len(line)
+
+            # Now move the cursor to the beginning of the line, but leave the anchor so that the line becomes selected
+            # and replace the selected text.
+            cur.movePosition(
+                QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor
+            )
+            cur.removeSelectedText()
+            cur.insertText(altered_line)
+
+            # Now capture the position of the beginning of the line so we can check it at the end of this loop
+            # to ensure that the new selection cursor position does not shift before the beginning of the line.
+            cur.movePosition(QtGui.QTextCursor.StartOfLine)
+            beginning_of_line_pos = cur.position()
+
+            # Now move up a line ready for the next loop and check we haven't gone beyond the start of the selection.
+            cur.movePosition(QtGui.QTextCursor.Up)
+            # Move to the end of the line before checking, so that we can be sure the cursor cannot be on the
+            # same line but before the start point.
+            cur.movePosition(QtGui.QTextCursor.EndOfLine)
+            if cur.position() < start:
+                # We've moved a line above the start of the selection
+                if line != altered_line:
+                    if unindent:
+                        # The line must have been unindented so record an updated end position
+                        new_start_pos -= len(line) - len(altered_line)
+                        # If the cursor was selecting the beginning of the line and we unindented,
+                        # then don't want to move the selection back as it wil shift on the line before.
+                        new_start_pos = (
+                            new_start_pos
+                            if new_start_pos >= beginning_of_line_pos
+                            else beginning_of_line_pos
+                        )
+                    else:
+                        if start != beginning_of_line_pos or cur_pos == anchor:
+                            # Only alter the start position on indentation if the selection cursor was not at the
+                            # beginning of the line, or if we've not selected a block of text.
+                            new_start_pos += len(altered_line) - len(line)
+                # break out of the loop
+                in_selection = False
+
+        # Restore the selection, but alter it so that it is relative to the changes we made.
+        if cur_pos > anchor:
+            cur.setPosition(new_start_pos)
+            # if cur_pos != anchor:
+            cur.setPosition(new_end_pos, QtGui.QTextCursor.KeepAnchor)
+        else:
+            cur.setPosition(new_end_pos)
+            cur.setPosition(new_start_pos, QtGui.QTextCursor.KeepAnchor)
+
+        self.setTextCursor(cur)
+        cur.endEditBlock()
 
     def line_number_area_width(self):
         """Calculate the width of the line number area."""
