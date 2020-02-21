@@ -236,8 +236,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             self.insertPlainText("\n")
             event.accept()
         elif event.key() == QtCore.Qt.Key_Slash:
-            print("comment")
             self.block_comment_selection()
+            event.accept()
         elif event.key() == QtCore.Qt.Key_Backtab:
             # Unindent the code.
             self.unindent()
