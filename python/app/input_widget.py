@@ -14,6 +14,7 @@ from __future__ import with_statement
 import math
 import sys
 import traceback
+import re
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
@@ -236,6 +237,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             event.accept()
         elif event.key() == QtCore.Qt.Key_Slash:
             print("comment")
+            self.block_comment_selection()
         elif event.key() == QtCore.Qt.Key_Backtab:
             # Unindent the code.
             self.unindent()
@@ -246,6 +248,71 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             event.accept()
         else:
             super(PythonInputWidget, self).keyPressEvent(event)
+
+    def block_comment_selection(self):
+
+        # Before attempting to alter the line, we should loop over the selected lines
+        # and check if any don't have a # at the start. If we find a line that doesn't then we
+        # will want to add commenting to all lines. If we don't find one then we want to remove the comments.
+
+        cur = self.textCursor()
+
+        cur_pos = cur.position()  # Where a selection ends
+        anchor = cur.anchor()  # Where a selection starts (can be the same as above)
+
+        # Since the anchor and the cursor position can be higher or lower in position than each other
+        # depending on which direction you selected the text, you should mark the position of the start and end
+        # with the start being the lowest position and the end being the highest position.
+        start = cur_pos if cur_pos < anchor else anchor
+        end = cur_pos if cur_pos > anchor else anchor
+
+        # Loop over the lines from the bottom up
+        cur.setPosition(start)
+
+        add_comment = False
+
+        pattern = re.compile(r"^((?: +)?)#")
+
+        while True:
+            line = cur.block().text()
+
+            if not pattern.match(line):
+                add_comment = True
+
+            line_pos = cur.position()
+            # Now move up a line ready for the next loop and check we haven't gone beyond the start of the selection.
+            cur.movePosition(QtGui.QTextCursor.Down)
+
+            if line_pos == cur.position():
+                # moving down a line hasn't altered the position so we must be on the last time.
+                break
+
+            # Move to the start of the line before checking, so that we can be sure the cursor cannot be on the
+            # same line but after the end point.
+            cur.movePosition(QtGui.QTextCursor.StartOfLine)
+            if cur.position() > end:
+                # break out of the loop
+                break
+
+        def add_comment_to_line(line):
+            return "# " + line
+
+        def remove_comment_to_line(line):
+
+            altered_line = re.sub(r"^((?: +)?)# ", "\g<1>", line, 1)
+            # Although we add a space after the comment when we add a comment,
+            # it is possible there might not be a space between the comment and the next character
+            # so check to see if we changed the line and if not, try removing a comment with out a space after.
+
+            if line == altered_line:
+                altered_line = re.sub(r"^((?: +)?)#", "\g<1>", line, 1)
+
+            return altered_line
+
+        if add_comment:
+            self._set_indentation(add_comment_to_line)
+        else:
+            self._set_indentation(remove_comment_to_line)
 
     def indent(self):
         def unindent_line(line):
@@ -293,11 +360,10 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         new_start_pos = start
         new_end_pos = end
 
-        in_selection = True
         # Loop over the lines from the bottom up and un-indent them.
         cur.setPosition(end)
 
-        while in_selection:
+        while True:
             # Jump to the end the end of the line, with both the cursor and the anchor
             cur.movePosition(QtGui.QTextCursor.EndOfLine)
             # Get the text for the block and perform the unindent
@@ -358,8 +424,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                             else beginning_of_line_pos
                         )
 
-                # break out of the loop
-                in_selection = False
+                # break out of the while loop
+                break
 
         # Restore the selection, but alter it so that it is relative to the changes we made.
         if cur_pos > anchor:
