@@ -238,22 +238,40 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             print("comment")
         elif event.key() == QtCore.Qt.Key_Backtab:
             # Unindent the code.
-            self._set_indentation(unindent=True)
+            self.unindent()
             event.accept()
         elif event.key() == QtCore.Qt.Key_Tab:
             # intercept the tab key and insert 4 spaces
-            self._set_indentation()
+            self.indent()
             event.accept()
         else:
             super(PythonInputWidget, self).keyPressEvent(event)
 
-    def _set_indentation(self, unindent=False):
+    def indent(self):
+        def unindent_line(line):
+            return "    " + line
+
+        self._set_indentation(unindent_line)
+
+    def unindent(self):
         def unindent_line(line):
             if line.startswith("    "):
                 return line[4:]
             elif line.startswith("\t"):
                 return line[2:]
             return line
+
+        self._set_indentation(unindent_line)
+
+    def _set_indentation(self, operation):
+        """
+        This method will unindent or indent the text the user has selected. It will also modify the selection
+        so that it is relative to the indented or unindented lines.
+
+        :param operation: A callable object that accepts a str "line" argument which will perform the desired
+         operation on the line.
+        :return: None
+        """
 
         cur = self.textCursor()
 
@@ -266,17 +284,19 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         start = cur_pos if cur_pos < anchor else anchor
         end = cur_pos if cur_pos > anchor else anchor
 
-        # mark the beginning of the block edit and mark the end after the unindent changes so they are recorded as a
+        # Mark the beginning of the block edit and mark the end after the unindent changes so they are recorded as a
         # single undo step.
         cur.beginEditBlock()
 
-        cur.setPosition(end)
-
+        # Create new start and end points that we can modify whilst we are iterating of the lines performing
+        # the operation so that we can use these to reselect the appropriate text at the end.
         new_start_pos = start
         new_end_pos = end
 
         in_selection = True
-        # Loop over the lines from the bottom up and un-indent them
+        # Loop over the lines from the bottom up and un-indent them.
+        cur.setPosition(end)
+
         while in_selection:
             # Jump to the end the end of the line, with both the cursor and the anchor
             cur.movePosition(QtGui.QTextCursor.EndOfLine)
@@ -284,17 +304,17 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             # It appears that a block in our situation represents a line. However if this turns out not to be the case
             # Then we should change this to select the line and then grab the selected text.
             line = cur.block().text()
-            if unindent:
-                altered_line = unindent_line(line)
-            else:
-                altered_line = "    " + line
+            altered_line = operation(line)
 
             if line != altered_line:
+                # check if the line has increased in length or decreased.
+                increase = True if len(altered_line) > len(line) else False
+
                 # The line must have had it's indentation changed, so record an updated end position
-                if unindent:
-                    new_end_pos -= len(line) - len(altered_line)
-                else:
+                if increase:
                     new_end_pos += len(altered_line) - len(line)
+                else:
+                    new_end_pos -= len(line) - len(altered_line)
 
             # Now move the cursor to the beginning of the line, but leave the anchor so that the line becomes selected
             # and replace the selected text.
@@ -317,7 +337,12 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             if cur.position() < start or beginning_of_line_pos == 0:
                 # We've moved a line above the start of the selection
                 if line != altered_line:
-                    if unindent:
+                    if increase:
+                        if start != beginning_of_line_pos or cur_pos == anchor:
+                            # Only alter the start position on indentation if the selection cursor was not at the
+                            # beginning of the line, or if we've not selected a block of text.
+                            new_start_pos += len(altered_line) - len(line)
+                    else:
                         # The line must have been unindented so record an updated end position
                         new_start_pos -= len(line) - len(altered_line)
                         # If the cursor was selecting the beginning of the line and we unindented,
@@ -332,11 +357,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                             if new_end_pos >= beginning_of_line_pos
                             else beginning_of_line_pos
                         )
-                    else:
-                        if start != beginning_of_line_pos or cur_pos == anchor:
-                            # Only alter the start position on indentation if the selection cursor was not at the
-                            # beginning of the line, or if we've not selected a block of text.
-                            new_start_pos += len(altered_line) - len(line)
+
                 # break out of the loop
                 in_selection = False
 
