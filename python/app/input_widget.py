@@ -228,15 +228,14 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         :param event: key press event object.
         """
-        # TODO: new line should start at the indentation of the previous line.
         # TODO: removing characters should check to see if we are removing indentation,
         # and then remove the indentation in blocks.
 
-        if event.modifiers() & QtCore.Qt.ShiftModifier and event.key() in [
+        if event.key() in [
             QtCore.Qt.Key_Enter,
             QtCore.Qt.Key_Return,
         ]:
-            self.insertPlainText("\n")
+            self.add_new_line()
             event.accept()
         elif event.key() == QtCore.Qt.Key_Slash:
             self.block_comment_selection()
@@ -250,6 +249,43 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             event.accept()
         else:
             super(PythonInputWidget, self).keyPressEvent(event)
+
+    def add_new_line(self):
+        """
+        Adds a new line from the cursor position.
+        The new line will be indented at the same level as the previous line.
+        :return: None
+        """
+        cur = self.textCursor()
+
+        cur.beginEditBlock()
+
+        cur_pos = cur.position()  # Where a selection ends
+        anchor = cur.anchor()  # Where a selection starts (can be the same as above)
+
+        # Since the anchor and the cursor position can be higher or lower in position than each other
+        # depending on which direction you selected the text, you should mark the position of the start and end
+        # with the start being the lowest position and the end being the highest position.
+        start = cur_pos if cur_pos < anchor else anchor
+
+        # We only want to match the indentation of the up most selected line.
+        cur.setPosition(start)
+
+        # Get the text for the current line, so that we can figure out the current line's indentation.
+        line = cur.block().text()
+
+        # Now separate out the indentation from the rest of the line and figure out how many spaces it is.
+        indentation, rest_of_line = self._split_indentation(line)
+        n_spaces = self._get_indentation_length(indentation)
+
+        # Add a new line plus the number of spaces in the previous line.
+        new_line = "\n" + (" " * n_spaces)
+
+        # Remove the currently selected text, as usually editors delete the selection and move onto the new line.
+        self.textCursor().removeSelectedText()
+        cur.insertText(new_line)
+        # end our undo block.
+        cur.endEditBlock()
 
     def block_comment_selection(self):
 
