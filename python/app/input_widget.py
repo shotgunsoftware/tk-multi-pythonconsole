@@ -228,8 +228,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         :param event: key press event object.
         """
-        # TODO: removing characters should check to see if we are removing indentation,
-        # and then remove the indentation in blocks.
 
         if event.key() in [
             QtCore.Qt.Key_Enter,
@@ -237,6 +235,13 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         ]:
             self.add_new_line()
             event.accept()
+        elif event.key() == QtCore.Qt.Key_Backspace:
+            # Attempt to remove the indentation if the cursor is within the indentation section of the line
+            # other wise fall back to default behaviour.
+            if self.remove_character_indentation():
+                event.accept()
+            else:
+                super(PythonInputWidget, self).keyPressEvent(event)
         elif event.key() == QtCore.Qt.Key_Slash:
             self.block_comment_selection()
             event.accept()
@@ -250,6 +255,21 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         else:
             super(PythonInputWidget, self).keyPressEvent(event)
 
+    def remove_character_indentation(self):
+        cur = self.textCursor()
+        if not cur.hasSelection():
+            user_cur_pos = cur.positionInBlock()
+            line = cur.block().text()
+
+            # Now separate out the indentation from the rest of the line and figure out how many spaces it is.
+            indentation, rest_of_line = self._split_indentation(line)
+
+            # Te current user cursor position is within the indentation.
+            if user_cur_pos <= len(indentation) and len(indentation) != 0:
+                self.unindent()
+                return True
+        return False
+
     def add_new_line(self):
         """
         Adds a new line from the cursor position.
@@ -258,6 +278,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """
         cur = self.textCursor()
 
+        # Start the undo block
         cur.beginEditBlock()
 
         cur_pos = cur.position()  # Where a selection ends
@@ -281,7 +302,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # We should check the current position in the line, if it sits somewhere in the indentation then match that.
         user_cur = self.textCursor()
         user_cur_pos = user_cur.positionInBlock()
-        if not user_cur.hasSelection() and user_cur_pos and user_cur_pos < n_spaces:
+        # Note don't use n_spaces in this calculation as tabs might have been removed.
+        if not user_cur.hasSelection() and user_cur_pos < len(indentation):
             n_spaces = user_cur_pos
 
         # Add a new line plus the number of spaces in the previous line.
@@ -290,7 +312,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # Remove the currently selected text, as usually editors delete the selection and move onto the new line.
         self.textCursor().removeSelectedText()
         cur.insertText(new_line)
-        # end our undo block.
+        # End our undo block.
         cur.endEditBlock()
 
     def block_comment_selection(self):
