@@ -320,6 +320,11 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         cur.endEditBlock()
 
     def block_comment_selection(self):
+        """
+        Either adds or removes comments from the selected line. If one line in the selection doesn't contain a comment
+         then it will add comments to all lines, otherwise it will remove comments from all lines.
+        :return: None
+        """
 
         # Before attempting to alter the line, we should loop over the selected lines
         # and check if any don't have a # at the start. If we find a line that doesn't then we
