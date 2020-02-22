@@ -278,6 +278,12 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         indentation, rest_of_line = self._split_indentation(line)
         n_spaces = self._get_indentation_length(indentation)
 
+        # We should check the current position in the line, if it sits somewhere in the indentation then match that.
+        user_cur = self.textCursor()
+        user_cur_pos = user_cur.positionInBlock()
+        if not user_cur.hasSelection() and user_cur_pos and user_cur_pos < n_spaces:
+            n_spaces = user_cur_pos
+
         # Add a new line plus the number of spaces in the previous line.
         new_line = "\n" + (" " * n_spaces)
 
