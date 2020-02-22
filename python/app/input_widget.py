@@ -398,7 +398,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             :return: `str`, the modified line.
             """
             # This regex should strip the first # before a character and the immediate space after if found.
-            altered_line = re.sub(r"^((?:[ \t]+)?)# ?", "\g<1>", line, 1)
+            altered_line = re.sub(r"^((?:[ \t]+)?)# ?", r"\g<1>", line, 1)
 
             return altered_line
 
