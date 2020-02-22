@@ -228,6 +228,9 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         :param event: key press event object.
         """
+        # TODO: new line should start at the indentation of the previous line.
+        # TODO: removing characters should check to see if we are removing indentation,
+        # and then remove the indentation in blocks.
 
         if event.modifiers() & QtCore.Qt.ShiftModifier and event.key() in [
             QtCore.Qt.Key_Enter,
@@ -239,7 +242,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             self.block_comment_selection()
             event.accept()
         elif event.key() == QtCore.Qt.Key_Backtab:
-            # Unindent the code.
             self.unindent()
             event.accept()
         elif event.key() == QtCore.Qt.Key_Tab:
@@ -254,6 +256,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # Before attempting to alter the line, we should loop over the selected lines
         # and check if any don't have a # at the start. If we find a line that doesn't then we
         # will want to add commenting to all lines. If we don't find one then we want to remove the comments.
+        # Also during this loop we can find the lowest indentation point across all selected lines,
+        # and then use that as the index to insert the comment (if we are inserting)
 
         cur = self.textCursor()
 
@@ -270,14 +274,25 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         cur.setPosition(start)
 
         add_comment = False
+        lowest_indent_index = None
 
-        pattern = re.compile(r"^((?: +)?)#")
+        hash_pattern = re.compile(r"^((?:[ \t]+)?)#")
 
         while True:
             line = cur.block().text()
 
-            if not pattern.match(line):
+            # check to see if the line has a hash before the first character
+            if not hash_pattern.match(line):
                 add_comment = True
+
+            # find the lowest indent
+            indentation, rest_of_line = self._split_indentation(line)
+            before_first_char_index = len(indentation)
+            if (
+                lowest_indent_index is None
+                or before_first_char_index < lowest_indent_index
+            ):
+                lowest_indent_index = before_first_char_index
 
             line_pos = cur.position()
             # Now move up a line ready for the next loop and check we haven't gone beyond the start of the selection.
@@ -295,45 +310,85 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                 break
 
         def add_comment_to_line(line):
-            return "# " + line
+            """
+            Will insert a hash followed by a space to the given line, and the
+            lowest indentation index for the selected lines.
+            :param line: str, the line to modify.
+            :return: `str`, the modified line.
+            """
+            return line[:lowest_indent_index] + "# " + line[lowest_indent_index:]
 
         def remove_comment_to_line(line):
-
-            altered_line = re.sub(r"^((?: +)?)# ", "\g<1>", line, 1)
-            # Although we add a space after the comment when we add a comment,
-            # it is possible there might not be a space between the comment and the next character
-            # so check to see if we changed the line and if not, try removing a comment with out a space after.
-
-            if line == altered_line:
-                altered_line = re.sub(r"^((?: +)?)#", "\g<1>", line, 1)
+            """
+            Will remove the # from the given line and if present the immediate space after.
+            :param line: str, the line to modify.
+            :return: `str`, the modified line.
+            """
+            # This regex should strip the first # before a character and the immediate space after if found.
+            altered_line = re.sub(r"^((?:[ \t]+)?)# ?", "\g<1>", line, 1)
 
             return altered_line
 
         if add_comment:
-            self._set_indentation(add_comment_to_line)
+            self._operate_on_selected_lines(add_comment_to_line)
         else:
-            self._set_indentation(remove_comment_to_line)
+            self._operate_on_selected_lines(remove_comment_to_line)
+
+    def _split_indentation(self, line):
+        first_char_pattern = re.compile(r"^([ \t]*)(.*)")
+        m = first_char_pattern.match(line)
+        return m.group(1), m.group(2)
+
+    def _get_indentation_length(self, line):
+        # convert any tabs to four spaces
+        return len(line.replace("\t", "    "))
 
     def indent(self):
-        def unindent_line(line):
-            return "    " + line
+        """
+        Will indent the selected lines with four spaces
+        :return: None
+        """
 
-        self._set_indentation(unindent_line)
+        def indent_line(line):
+            indentation, rest_of_line = self._split_indentation(line)
+            n_spaces = self._get_indentation_length(indentation)
+
+            # break the number of spaces down in to multiples of 4
+            # so that we indent to whole levels of 4
+            r = n_spaces / 4
+            if r.is_integer():
+                n_spaces = n_spaces + 4
+            else:
+                n_spaces = math.ceil(r) * 4
+
+            return (" " * n_spaces) + rest_of_line
+
+        self._operate_on_selected_lines(indent_line)
 
     def unindent(self):
-        def unindent_line(line):
-            if line.startswith("    "):
-                return line[4:]
-            elif line.startswith("\t"):
-                return line[2:]
-            return line
-
-        self._set_indentation(unindent_line)
-
-    def _set_indentation(self, operation):
         """
-        This method will unindent or indent the text the user has selected. It will also modify the selection
-        so that it is relative to the indented or unindented lines.
+        Will attempt to unindent the selected lines by removing four spaces or tab characters.
+        :return: None
+        """
+
+        def unindent_line(line):
+            indentation, rest_of_line = self._split_indentation(line)
+            n_spaces = self._get_indentation_length(indentation)
+
+            r = n_spaces / 4
+            if r.is_integer():
+                n_spaces = n_spaces - 4
+            else:
+                n_spaces = math.floor(r) * 4
+
+            return (" " * n_spaces) + rest_of_line
+
+        self._operate_on_selected_lines(unindent_line)
+
+    def _operate_on_selected_lines(self, operation):
+        """
+        This method will operate on the text the user has selected, using the passed operation callable.
+        It will also modify the selection so that it is relative to the increase or decrease in length of the lines.
 
         :param operation: A callable object that accepts a str "line" argument which will perform the desired
          operation on the line.
@@ -436,6 +491,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             cur.setPosition(new_start_pos, QtGui.QTextCursor.KeepAnchor)
 
         self.setTextCursor(cur)
+        # end our undo block.
         cur.endEditBlock()
 
     def line_number_area_width(self):
