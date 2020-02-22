@@ -228,7 +228,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         :param event: key press event object.
         """
-
         if event.key() in [
             QtCore.Qt.Key_Enter,
             QtCore.Qt.Key_Return,
@@ -256,6 +255,11 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             super(PythonInputWidget, self).keyPressEvent(event)
 
     def remove_character_indentation(self):
+        """
+        Attempts to remove a single indentation block if there is no selection and the cursor is in the indentation
+        part of the line. It returns True if we unindented and False if we didn't.
+        :return: bool
+        """
         cur = self.textCursor()
         if not cur.hasSelection():
             user_cur_pos = cur.positionInBlock()
@@ -399,13 +403,23 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             self._operate_on_selected_lines(remove_comment_to_line)
 
     def _split_indentation(self, line):
+        """
+        Returns the line as a tuple broken up into indentation and the rest of the line.
+        :param line: str
+        :return: str
+        """
         first_char_pattern = re.compile(r"^([ \t]*)(.*)")
         m = first_char_pattern.match(line)
         return m.group(1), m.group(2)
 
-    def _get_indentation_length(self, line):
+    def _get_indentation_length(self, indentation_str):
+        """
+        Returns the length of the indentation_str but substitutes tabs for four spaces.
+        :param line: str
+        :return: str
+        """
         # convert any tabs to four spaces
-        return len(line.replace("\t", "    "))
+        return len(indentation_str.replace("\t", "    "))
 
     def indent(self):
         """
