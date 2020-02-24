@@ -12,9 +12,9 @@
 from __future__ import with_statement
 
 import math
-import sys
 import traceback
 import re
+import os
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
@@ -285,13 +285,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # Start the undo block
         cur.beginEditBlock()
 
-        cur_pos = cur.position()  # Where a selection ends
-        anchor = cur.anchor()  # Where a selection starts (can be the same as above)
-
-        # Since the anchor and the cursor position can be higher or lower in position than each other
-        # depending on which direction you selected the text, you should mark the position of the start and end
-        # with the start being the lowest position and the end being the highest position.
-        start = cur_pos if cur_pos < anchor else anchor
+        cur_pos, anchor, start, end = self._get_cursor_positions(cur)
 
         # We only want to match the indentation of the up most selected line.
         cur.setPosition(start)
@@ -304,13 +298,21 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         n_spaces = self._get_indentation_length(indentation)
 
         # We should check the current position in the line, if it sits somewhere in the indentation then match that.
-        user_cur = self.textCursor()
-        user_cur_pos = user_cur.positionInBlock()
+        cur_pos_in_block = cur.positionInBlock()
         # Note don't use n_spaces in this calculation as tabs might have been removed.
-        if not user_cur.hasSelection() and user_cur_pos < len(indentation):
-            n_spaces = user_cur_pos
+        if not self.textCursor().hasSelection() and cur_pos_in_block < len(indentation):
+            n_spaces = cur_pos_in_block
 
-        # Add a new line plus the number of spaces in the previous line.
+        # Check if the current line has a `:` at the end. Also account for any white spaces after it.
+        # If we find one, then the next line should auto indent four spaces.
+        check_for_colon = re.compile(r":[ \t]*$")
+        match = check_for_colon.search(line)
+        # Make sure we have a match and that the cursor is after the colon
+        if match and cur_pos_in_block > match.span()[0]:
+            n_spaces += 4
+
+        # Add a new line plus the number of spaces in the previous line, plus any extra we might have added if a
+        # colon was found at the end of the line before.
         new_line = "\n" + (" " * n_spaces)
 
         # Remove the currently selected text, as usually editors delete the selection and move onto the new line.
@@ -334,14 +336,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         cur = self.textCursor()
 
-        cur_pos = cur.position()  # Where a selection ends
-        anchor = cur.anchor()  # Where a selection starts (can be the same as above)
-
-        # Since the anchor and the cursor position can be higher or lower in position than each other
-        # depending on which direction you selected the text, you should mark the position of the start and end
-        # with the start being the lowest position and the end being the highest position.
-        start = cur_pos if cur_pos < anchor else anchor
-        end = cur_pos if cur_pos > anchor else anchor
+        cur_pos, anchor, start, end = self._get_cursor_positions(cur)
 
         # Loop over the lines from the bottom up
         cur.setPosition(start)
@@ -426,6 +421,25 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # convert any tabs to four spaces
         return len(indentation_str.replace("\t", "    "))
 
+    def _get_cursor_positions(self, cursor):
+        """
+        This method returns back the cursor's position, anchor, and the start and end.
+        Since the selection direction can be either way it can be  useful to know which
+        out of the cursor and anchor positions are the earliest and furthest points, so the start
+        and end is also provided.
+        :param cursor:
+        :return:
+        """
+        cur_pos = cursor.position()  # Where a selection ends
+        anchor = cursor.anchor()  # Where a selection starts (can be the same as above)
+
+        # Since the anchor and the cursor position can be higher or lower in position than each other
+        # depending on which direction you selected the text, you should mark the position of the start and end
+        # with the start being the lowest position and the end being the highest position.
+        start = cur_pos if cur_pos < anchor else anchor
+        end = cur_pos if cur_pos > anchor else anchor
+        return cur_pos, anchor, start, end
+
     def indent(self):
         """
         Will indent the selected lines with four spaces
@@ -482,14 +496,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         cur = self.textCursor()
 
-        cur_pos = cur.position()  # Where a selection ends
-        anchor = cur.anchor()  # Where a selection starts (can be the same as above)
-
-        # Since the anchor and the cursor position can be higher or lower in position than each other
-        # depending on which direction you selected the text, you should mark the position of the start and end
-        # with the start being the lowest position and the end being the highest position.
-        start = cur_pos if cur_pos < anchor else anchor
-        end = cur_pos if cur_pos > anchor else anchor
+        cur_pos, anchor, start, end = self._get_cursor_positions(cur)
 
         # Mark the beginning of the block edit and mark the end after the unindent changes so they are recorded as a
         # single undo step.
@@ -674,6 +681,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         save_dialog.setOption(QtGui.QFileDialog.DontUseNativeDialog, True)
         save_dialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
         save_dialog.setViewMode(QtGui.QFileDialog.Detail)
+        save_dialog.setDefaultSuffix(".py")
         save_path = None
         if save_dialog.exec_():
             save_path = save_dialog.selectedFiles()[0]
