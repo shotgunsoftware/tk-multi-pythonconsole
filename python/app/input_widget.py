@@ -439,7 +439,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             # break the number of spaces down in to multiples of 4
             # so that we indent to whole levels of 4
             r = n_spaces / 4
-            if r.is_integer():
+            if type(r) is int or (type(r) is float and r.is_integer()):
                 n_spaces = n_spaces + 4
             else:
                 n_spaces = math.ceil(r) * 4
@@ -459,7 +459,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             n_spaces = self._get_indentation_length(indentation)
 
             r = n_spaces / 4
-            if r.is_integer():
+            if type(r) is int or (type(r) is float and r.is_integer()):
                 n_spaces = n_spaces - 4
             else:
                 n_spaces = math.floor(r) * 4
