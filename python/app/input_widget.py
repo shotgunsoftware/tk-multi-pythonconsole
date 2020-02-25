@@ -14,7 +14,6 @@ from __future__ import with_statement
 import math
 import traceback
 import re
-import os
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
@@ -282,7 +281,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """
         cur = self.textCursor()
 
-        # Start the undo block
+        # beginEditBlock will start the undo block, we end it after making the changes.
+        # That ensures all the changes are recorded as one undo level.
         cur.beginEditBlock()
 
         cur_pos, anchor, start, end = self._get_cursor_positions(cur)
@@ -303,9 +303,9 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         if not self.textCursor().hasSelection() and cur_pos_in_block < len(indentation):
             n_spaces = cur_pos_in_block
 
-        # Check if the current line has a `:` at the end. Also account for any white spaces after it.
+        # Check if the current line has a `:` at the end. Also account for any white spaces or comments after it.
         # If we find one, then the next line should auto indent four spaces.
-        check_for_colon = re.compile(r":[ \t]*$")
+        check_for_colon = re.compile(r":[ \t]*(#.*)?$")
         match = check_for_colon.search(line)
         # Make sure we have a match and that the cursor is after the colon
         if match and cur_pos_in_block > match.span()[0]:
@@ -406,7 +406,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """
         Returns the line as a tuple broken up into indentation and the rest of the line.
         :param line: str
-        :return: str
+        :return: tuple containing two strings, the first contains the indentation, and the second contains the
         """
         first_char_pattern = re.compile(r"^([ \t]*)(.*)")
         m = first_char_pattern.match(line)
@@ -416,7 +416,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """
         Returns the length of the indentation_str but substitutes tabs for four spaces.
         :param line: str
-        :return: str
+        :return: int
         """
         # convert any tabs to four spaces
         return len(indentation_str.replace("\t", "    "))
@@ -427,8 +427,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         Since the selection direction can be either way it can be  useful to know which
         out of the cursor and anchor positions are the earliest and furthest points, so the start
         and end is also provided.
-        :param cursor:
-        :return:
+        :param cursor: QCursor
+        :return: tuple containing current cursor position, anchor, start, and end
         """
         cur_pos = cursor.position()  # Where a selection ends
         anchor = cursor.anchor()  # Where a selection starts (can be the same as above)
@@ -443,7 +443,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
     def indent(self):
         """
         Will indent the selected lines with four spaces
-        :return: None
         """
 
         def indent_line(line):
@@ -466,7 +465,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
     def unindent(self):
         """
         Will attempt to unindent the selected lines by removing four spaces or tab characters.
-        :return: None
         """
 
         def unindent_line(line):
