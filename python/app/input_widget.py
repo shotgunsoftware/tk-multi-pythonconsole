@@ -268,7 +268,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             # Now separate out the indentation from the rest of the line and figure out how many spaces it is.
             indentation, rest_of_line = self._split_indentation(line)
 
-            # Te current user cursor position is within the indentation.
+            # The current user cursor position is within the indentation.
             if user_cur_pos <= len(indentation) and len(indentation) != 0:
                 self.unindent()
                 return True
