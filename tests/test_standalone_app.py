@@ -210,6 +210,8 @@ def test_execute_script(
         ("    a = 1", "    a\n    ", "new_line", (5, 9)),
         # test adding a new line after a colon, it should auto indent by 4
         ("    def test(): ", "    def test(): \n        ", "new_line", (16, 16)),
+        # test adding a new line after a colon with an inline comment, it should auto indent by 4
+        ("def test(): # asd#.", "def test(): # asd#.\n    ", "new_line", (19, 19)),
         # test adding a new line with the selection before the colon, it should indent to the same level.
         ("    def test(): ", "    def test(\n    ): ", "new_line", (13, 13)),
     ],
