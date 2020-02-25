@@ -424,7 +424,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
     def _get_cursor_positions(self, cursor):
         """
         This method returns back the cursor's position, anchor, and the start and end.
-        Since the selection direction can be either way it can be  useful to know which
+        Since the selection direction can be either way it can be useful to know which
         out of the cursor and anchor positions are the earliest and furthest points, so the start
         and end is also provided.
         :param cursor:
