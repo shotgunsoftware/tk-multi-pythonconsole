@@ -342,8 +342,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         # Check if the current line has a `:` at the end. Also account for any white spaces or comments after it.
         # If we find one, then the next line should auto indent four spaces.
-        check_for_colon = re.compile(r":[ \t]*(#.*)?$")
-        match = check_for_colon.search(line)
+        # https://regex101.com/r/BnEhPk/1
+        match = re.search(r":[ \t]*(#.*)?$", line)
         # Make sure we have a match and that the cursor is after the colon
         if match and cur_pos_in_block > match.span()[0]:
             n_spaces += 4
@@ -365,6 +365,18 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         :return: None
         """
 
+        def add_comment_to_line(line):
+            # Will insert a hash followed by a space to the given line, and the
+            # lowest indentation index for the selected lines.
+            return line[:lowest_indent_index] + "# " + line[lowest_indent_index:]
+
+        def remove_comment_to_line(line):
+            # Will remove the # from the given line and if present the immediate space after.
+            # This regex should strip the first # before a character and the immediate space after if found.
+            # https://regex101.com/r/bQ9OXk/1
+            altered_line = re.sub(r"^((?:[ \t]+)?)# ?", r"\g<1>", line, 1)
+            return altered_line
+
         # Before attempting to alter the line, we should loop over the selected lines
         # and check if any don't have a # at the start. If we find a line that doesn't then we
         # will want to add commenting to all lines. If we don't find one then we want to remove the comments.
@@ -381,6 +393,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         add_comment = False
         lowest_indent_index = None
 
+        # This regex matches lines that have a hash before any text.
+        # https://regex101.com/r/JsYVpL/1
         hash_pattern = re.compile(r"^((?:[ \t]+)?)#")
 
         while True:
@@ -414,26 +428,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                 # break out of the loop
                 break
 
-        def add_comment_to_line(line):
-            """
-            Will insert a hash followed by a space to the given line, and the
-            lowest indentation index for the selected lines.
-            :param line: str, the line to modify.
-            :return: `str`, the modified line.
-            """
-            return line[:lowest_indent_index] + "# " + line[lowest_indent_index:]
-
-        def remove_comment_to_line(line):
-            """
-            Will remove the # from the given line and if present the immediate space after.
-            :param line: str, the line to modify.
-            :return: `str`, the modified line.
-            """
-            # This regex should strip the first # before a character and the immediate space after if found.
-            altered_line = re.sub(r"^((?:[ \t]+)?)# ?", r"\g<1>", line, 1)
-
-            return altered_line
-
         if add_comment:
             self._operate_on_selected_lines(add_comment_to_line)
         else:
@@ -445,8 +439,9 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         :param line: str
         :return: tuple containing two strings, the first contains the indentation, and the second contains the
         """
-        first_char_pattern = re.compile(r"^([ \t]*)(.*)")
-        m = first_char_pattern.match(line)
+        # The regex separates the indent and the rest of the line into two groups.
+        # https://regex101.com/r/XZluTm/2
+        m = re.match(r"^([ \t]*)(.*)", line)
         return m.group(1), m.group(2)
 
     def _get_indentation_length(self, indentation_str):
