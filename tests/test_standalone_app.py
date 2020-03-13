@@ -185,7 +185,9 @@ def test_execute_script(
             "    a = 1\n"
             "        b = 2\n"
             "    c = 3",
+            # action
             "indent",
+            # cursor selection start and end position (None selects all)
             None,
         ),
         (
@@ -203,7 +205,7 @@ def test_execute_script(
             "    e = 5",
             # action
             "unindent",
-            # cursor selection start and end position
+            # cursor selection start and end position (None selects all)
             None,
         ),
         # test adding a comment
@@ -220,7 +222,7 @@ def test_execute_script(
             "#         d = 4",
             # action
             "comment",
-            # cursor selection start and end position
+            # cursor selection start and end position (None selects all)
             None,
         ),
         # test removing a comment
@@ -233,7 +235,7 @@ def test_execute_script(
             "    b = 2",
             # action
             "comment",
-            # cursor selection start and end position
+            # cursor selection start and end position (None selects all)
             None,
         ),
         # test comments being added at the correct level of indentation
@@ -246,7 +248,7 @@ def test_execute_script(
             "    # b = 2",
             # action
             "comment",
-            # cursor selection start and end position
+            # cursor selection start and end position (None selects all)
             None
         ),
         # test removing character when cursor in indentation
