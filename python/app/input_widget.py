@@ -299,6 +299,8 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         part of the line. It returns True if we unindented and False if we didn't.
         :return: bool
         """
+        # We don't need to decorate this method with @safe_modify_content since it doesn't make any changes itself
+        # and calls unindent() which is decorated.
         cur = self.textCursor()
         if not cur.hasSelection():
             user_cur_pos = cur.positionInBlock()
@@ -433,45 +435,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         else:
             self._operate_on_selected_lines(remove_comment_to_line)
 
-    def _split_indentation(self, line):
-        """
-        Returns the line as a tuple broken up into indentation and the rest of the line.
-        :param line: str
-        :return: tuple containing two strings, the first contains the indentation, and the second contains the
-        """
-        # The regex separates the indent and the rest of the line into two groups.
-        # https://regex101.com/r/XZluTm/2
-        m = re.match(r"^([ \t]*)(.*)", line)
-        return m.group(1), m.group(2)
-
-    def _get_indentation_length(self, indentation_str):
-        """
-        Returns the length of the indentation_str but substitutes tabs for four spaces.
-        :param line: str
-        :return: int
-        """
-        # convert any tabs to four spaces
-        return len(indentation_str.replace("\t", "    "))
-
-    def _get_cursor_positions(self, cursor):
-        """
-        This method returns back the cursor's position, anchor, and the start and end.
-        Since the selection direction can be either way it can be useful to know which
-        out of the cursor and anchor positions are the earliest and furthest points, so the start
-        and end is also provided.
-        :param cursor: QCursor
-        :return: tuple containing current cursor position, anchor, start, and end
-        """
-        cur_pos = cursor.position()  # Where a selection ends
-        anchor = cursor.anchor()  # Where a selection starts (can be the same as above)
-
-        # Since the anchor and the cursor position can be higher or lower in position than each other
-        # depending on which direction you selected the text, you should mark the position of the start and end
-        # with the start being the lowest position and the end being the highest position.
-        start = cur_pos if cur_pos < anchor else anchor
-        end = cur_pos if cur_pos > anchor else anchor
-        return cur_pos, anchor, start, end
-
     @safe_modify_content
     def indent(self):
         """
@@ -515,102 +478,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             return (" " * n_spaces) + rest_of_line
 
         self._operate_on_selected_lines(unindent_line)
-
-    def _operate_on_selected_lines(self, operation):
-        """
-        This method will operate on the text the user has selected, using the passed operation callable.
-        It will also modify the selection so that it is relative to the increase or decrease in length of the lines.
-
-        :param operation: A callable object that accepts a str "line" argument which will perform the desired
-         operation on the line.
-        :return: None
-        """
-
-        cur = self.textCursor()
-
-        cur_pos, anchor, start, end = self._get_cursor_positions(cur)
-
-        # Create new start and end points that we can modify whilst we are iterating of the lines performing
-        # the operation so that we can use these to reselect the appropriate text at the end.
-        new_start_pos = start
-        new_end_pos = end
-
-        # Loop over the lines from the bottom up and un-indent them.
-        cur.setPosition(end)
-
-        while True:
-            # Jump to the end the end of the line, with both the cursor and the anchor
-            cur.movePosition(QtGui.QTextCursor.EndOfLine)
-            # Get the text for the block and perform the unindent
-            # It appears that a block in our situation represents a line. However if this turns out not to be the case
-            # Then we should change this to select the line and then grab the selected text.
-            line = cur.block().text()
-            altered_line = operation(line)
-
-            if line != altered_line:
-                # check if the line has increased in length or decreased.
-                increase = True if len(altered_line) > len(line) else False
-
-                # The line must have had it's indentation changed, so record an updated end position
-                if increase:
-                    new_end_pos += len(altered_line) - len(line)
-                else:
-                    new_end_pos -= len(line) - len(altered_line)
-
-            # Now move the cursor to the beginning of the line, but leave the anchor so that the line becomes selected
-            # and replace the selected text.
-            cur.movePosition(
-                QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor
-            )
-            cur.removeSelectedText()
-            cur.insertText(altered_line)
-
-            # Now capture the position of the beginning of the line so we can check it at the end of this loop
-            # to ensure that the new selection cursor position does not shift before the beginning of the line.
-            cur.movePosition(QtGui.QTextCursor.StartOfLine)
-            beginning_of_line_pos = cur.position()
-
-            # Now move up a line ready for the next loop and check we haven't gone beyond the start of the selection.
-            cur.movePosition(QtGui.QTextCursor.Up)
-            # Move to the end of the line before checking, so that we can be sure the cursor cannot be on the
-            # same line but before the start point.
-            cur.movePosition(QtGui.QTextCursor.EndOfLine)
-            if cur.position() < start or beginning_of_line_pos == 0:
-                # We've moved a line above the start of the selection
-                if line != altered_line:
-                    if increase:
-                        if start != beginning_of_line_pos or cur_pos == anchor:
-                            # Only alter the start position on indentation if the selection cursor was not at the
-                            # beginning of the line, or if we've not selected a block of text.
-                            new_start_pos += len(altered_line) - len(line)
-                    else:
-                        # The line must have been unindented so record an updated end position
-                        new_start_pos -= len(line) - len(altered_line)
-                        # If the cursor was selecting the beginning of the line and we unindented,
-                        # then don't want to move the selection back as it wil shift on the line before.
-                        new_start_pos = (
-                            new_start_pos
-                            if new_start_pos >= beginning_of_line_pos
-                            else beginning_of_line_pos
-                        )
-                        new_end_pos = (
-                            new_end_pos
-                            if new_end_pos >= beginning_of_line_pos
-                            else beginning_of_line_pos
-                        )
-
-                # break out of the while loop
-                break
-
-        # Restore the selection, but alter it so that it is relative to the changes we made.
-        if cur_pos > anchor:
-            cur.setPosition(new_start_pos)
-            cur.setPosition(new_end_pos, QtGui.QTextCursor.KeepAnchor)
-        else:
-            cur.setPosition(new_end_pos)
-            cur.setPosition(new_start_pos, QtGui.QTextCursor.KeepAnchor)
-
-        self.setTextCursor(cur)
 
     def line_number_area_width(self):
         """Calculate the width of the line number area."""
@@ -913,6 +780,141 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         """
         self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
+
+    def _operate_on_selected_lines(self, operation):
+        """
+        This method will operate on the text the user has selected, using the passed operation callable.
+        It will also modify the selection so that it is relative to the increase or decrease in length of the lines.
+
+        :param operation: A callable object that accepts a str "line" argument which will perform the desired
+         operation on the line.
+        :return: None
+        """
+
+        cur = self.textCursor()
+
+        cur_pos, anchor, start, end = self._get_cursor_positions(cur)
+
+        # Create new start and end points that we can modify whilst we are iterating of the lines performing
+        # the operation so that we can use these to reselect the appropriate text at the end.
+        new_start_pos = start
+        new_end_pos = end
+
+        # Loop over the lines from the bottom up and un-indent them.
+        cur.setPosition(end)
+
+        while True:
+            # Jump to the end the end of the line, with both the cursor and the anchor
+            cur.movePosition(QtGui.QTextCursor.EndOfLine)
+            # Get the text for the block and perform the unindent
+            # It appears that a block in our situation represents a line. However if this turns out not to be the case
+            # Then we should change this to select the line and then grab the selected text.
+            line = cur.block().text()
+            altered_line = operation(line)
+
+            if line != altered_line:
+                # check if the line has increased in length or decreased.
+                increase = True if len(altered_line) > len(line) else False
+
+                # The line must have had it's indentation changed, so record an updated end position
+                if increase:
+                    new_end_pos += len(altered_line) - len(line)
+                else:
+                    new_end_pos -= len(line) - len(altered_line)
+
+            # Now move the cursor to the beginning of the line, but leave the anchor so that the line becomes selected
+            # and replace the selected text.
+            cur.movePosition(
+                QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor
+            )
+            cur.removeSelectedText()
+            cur.insertText(altered_line)
+
+            # Now capture the position of the beginning of the line so we can check it at the end of this loop
+            # to ensure that the new selection cursor position does not shift before the beginning of the line.
+            cur.movePosition(QtGui.QTextCursor.StartOfLine)
+            beginning_of_line_pos = cur.position()
+
+            # Now move up a line ready for the next loop and check we haven't gone beyond the start of the selection.
+            cur.movePosition(QtGui.QTextCursor.Up)
+            # Move to the end of the line before checking, so that we can be sure the cursor cannot be on the
+            # same line but before the start point.
+            cur.movePosition(QtGui.QTextCursor.EndOfLine)
+            if cur.position() < start or beginning_of_line_pos == 0:
+                # We've moved a line above the start of the selection
+                if line != altered_line:
+                    if increase:
+                        if start != beginning_of_line_pos or cur_pos == anchor:
+                            # Only alter the start position on indentation if the selection cursor was not at the
+                            # beginning of the line, or if we've not selected a block of text.
+                            new_start_pos += len(altered_line) - len(line)
+                    else:
+                        # The line must have been unindented so record an updated end position
+                        new_start_pos -= len(line) - len(altered_line)
+                        # If the cursor was selecting the beginning of the line and we unindented,
+                        # then don't want to move the selection back as it wil shift on the line before.
+                        new_start_pos = (
+                            new_start_pos
+                            if new_start_pos >= beginning_of_line_pos
+                            else beginning_of_line_pos
+                        )
+                        new_end_pos = (
+                            new_end_pos
+                            if new_end_pos >= beginning_of_line_pos
+                            else beginning_of_line_pos
+                        )
+
+                # break out of the while loop
+                break
+
+        # Restore the selection, but alter it so that it is relative to the changes we made.
+        if cur_pos > anchor:
+            cur.setPosition(new_start_pos)
+            cur.setPosition(new_end_pos, QtGui.QTextCursor.KeepAnchor)
+        else:
+            cur.setPosition(new_end_pos)
+            cur.setPosition(new_start_pos, QtGui.QTextCursor.KeepAnchor)
+
+        self.setTextCursor(cur)
+
+    def _split_indentation(self, line):
+        """
+        Returns the line as a tuple broken up into indentation and the rest of the line.
+        :param line: str
+        :return: tuple containing two strings, the first contains the indentation, and the second contains the
+        """
+        # The regex separates the indent and the rest of the line into two groups.
+        # https://regex101.com/r/XZluTm/2
+        m = re.match(r"^([ \t]*)(.*)", line)
+        return m.group(1), m.group(2)
+
+    def _get_indentation_length(self, indentation_str):
+        """
+        Returns the length of the indentation_str but substitutes tabs for four spaces.
+        :param line: str
+        :return: int
+        """
+        # convert any tabs to four spaces
+        return len(indentation_str.replace("\t", "    "))
+
+    def _get_cursor_positions(self, cursor):
+        """
+        This method returns back the cursor's position, anchor, and the start and end.
+        Since the selection direction can be either way it can be useful to know which
+        out of the cursor and anchor positions are the earliest and furthest points, so the start
+        and end is also provided.
+        :param cursor: QCursor
+        :return: tuple containing current cursor position, anchor, start, and end
+        """
+        cur_pos = cursor.position()  # Where a selection ends
+        anchor = cursor.anchor()  # Where a selection starts (can be the same as above)
+
+        # Since the anchor and the cursor position can be higher or lower in position than each other
+        # depending on which direction you selected the text, you should mark the position of the start and end
+        # with the start being the lowest position and the end being the highest position.
+        start = cur_pos if cur_pos < anchor else anchor
+        end = cur_pos if cur_pos > anchor else anchor
+        return cur_pos, anchor, start, end
 
 
 class _LineNumberArea(QtGui.QWidget):
