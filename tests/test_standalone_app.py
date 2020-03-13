@@ -172,50 +172,172 @@ def test_execute_script(
         assert actual_output == expected_output
 
 
+# fmt: off
 @pytest.mark.parametrize(
     "script, altered_script, operation, selection_range",
     [
         (
-            "a = 1\n    b = 2\n c = 3",
-            "    a = 1\n        b = 2\n    c = 3",
+            # source
+            "a = 1\n"
+            "    b = 2\n"
+            "c = 3",
+            # result
+            "    a = 1\n"
+            "        b = 2\n"
+            "    c = 3",
             "indent",
             None,
         ),
         (
-            "a = 1\n    b = 2\n c = 3\n        d = 4\n     e = 5",
-            "a = 1\nb = 2\nc = 3\n    d = 4\n    e = 5",
+            # source
+            "a = 1\n"
+            "    b = 2\n"
+            " c = 3\n"
+            "        d = 4\n"
+            "     e = 5",
+            # result
+            "a = 1\n"
+            "b = 2\n"
+            "c = 3\n"
+            "    d = 4\n"
+            "    e = 5",
+            # action
             "unindent",
+            # cursor selection start and end position
             None,
         ),
         # test adding a comment
         (
-            "a = 1\n    # b = 2\n c = 3\n        d = 4",
-            "# a = 1\n#     # b = 2\n#  c = 3\n#         d = 4",
+            # source
+            "a = 1\n"
+            "    # b = 2\n"
+            " c = 3\n"
+            "        d = 4",
+            # result
+            "# a = 1\n"
+            "#     # b = 2\n"
+            "#  c = 3\n"
+            "#         d = 4",
+            # action
             "comment",
+            # cursor selection start and end position
             None,
         ),
         # test removing a comment
-        ("# a = 1\n    # b = 2", "a = 1\n    b = 2", "comment", None),
+        (
+            # Source
+            "# a = 1\n"
+            "    # b = 2",
+            # result
+            "a = 1\n"
+            "    b = 2",
+            # action
+            "comment",
+            # cursor selection start and end position
+            None,
+        ),
         # test comments being added at the correct level of indentation
-        ("    a = 1\n    b = 2", "    # a = 1\n    # b = 2", "comment", None),
+        (
+            # source
+            "    a = 1\n"
+            "    b = 2",
+            # result
+            "    # a = 1\n"
+            "    # b = 2",
+            # action
+            "comment",
+            # cursor selection start and end position
+            None
+        ),
         # test removing character when cursor in indentation
-        ("    a = 1", "a = 1", "delete", (4, 4)),
+        (
+            # source
+            "    a = 1",
+            # result
+            "a = 1",
+            # action
+            "delete",
+            # cursor selection start and end position
+            (4, 4)
+        ),
         # test removing character when cursor in indentation
-        ("     a = 1", "    a = 1", "delete", (4, 4)),
+        (
+            # source
+            "     a = 1",
+            # result
+            "    a = 1",
+            # action
+            "delete",
+            # cursor selection start and end position
+            (4, 4)),
         # test removing character when cursor not in indentation
-        ("    a = 1", "    a = ", "delete", (9, 9)),
+        (
+            # source
+            "    a = 1",
+            # result
+            "    a = ",
+            # action
+            "delete",
+            # cursor selection start and end position
+            (9, 9)),
         # test adding a new line
-        ("    a = 1", "    a = 1\n    ", "new_line", (9, 9)),
+        (
+            # source
+            "    a = 1",
+            # result
+            "    a = 1\n"
+            "    ",
+            # action
+            "new_line",
+            # cursor selection start and end position
+            (9, 9)),
         # test adding a to a new line to a selection
-        ("    a = 1", "    a\n    ", "new_line", (5, 9)),
+        (
+            # source
+            "    a = 1",
+            # result
+            "    a\n"
+            "    ",
+            # action
+            "new_line",
+            # cursor selection start and end position
+            (5, 9)),
         # test adding a new line after a colon, it should auto indent by 4
-        ("    def test(): ", "    def test(): \n        ", "new_line", (16, 16)),
+        (
+            # source
+            "    def test(): ",
+            # result
+            "    def test(): \n"
+            "        ",
+            # action
+            "new_line",
+            # cursor selection start and end position
+            (16, 16)),
         # test adding a new line after a colon with an inline comment, it should auto indent by 4
-        ("def test(): # asd#.", "def test(): # asd#.\n    ", "new_line", (19, 19)),
+        (
+            # source
+            "def test(): # asd#.",
+            # result
+            "def test(): # asd#.\n"
+            "    ",
+            # action
+            "new_line",
+            # cursor selection start and end position
+            (19, 19)),
         # test adding a new line with the selection before the colon, it should indent to the same level.
-        ("    def test(): ", "    def test(\n    ): ", "new_line", (13, 13)),
+        (
+            # source
+            "    def test(): ",
+            # result
+            "    def test(\n"
+            "    ): ",
+            # action
+            "new_line",
+            # cursor selection start and end position
+            (13, 13)),
     ],
 )
+# fmt: on
 def test_block_text_operations(
     console_widget, script, altered_script, operation, selection_range
 ):
