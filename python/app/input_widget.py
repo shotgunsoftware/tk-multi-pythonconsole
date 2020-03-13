@@ -26,6 +26,46 @@ from .redirect import StderrRedirector, StdinRedirector, StdoutRedirector
 from .syntax_highlighter import PythonSyntaxHighlighter
 from .util import colorize
 
+try:
+    import sgtk
+except ImportError:
+    sgtk = None
+
+
+def safe_modify_content(func):
+    """
+    This method can be used as a decorator, on methods that alter the contents of the
+    text edit.
+    It handles starting and ending of undo blocks, and performs an undo in the event of the
+    method erroring.
+    """
+
+    def function_wrapper(self, *args):
+        cur = self.textCursor()
+
+        # beginEditBlock will start the undo block, we end it after making the changes.
+        # That ensures all the changes are recorded as one undo level.
+        cur.beginEditBlock()
+        perform_undo = False
+
+        # Try to modify the content but if it errors undo our changes.
+        try:
+            # call the main function with any args.
+            func(self, *args)
+        except Exception:
+            # if Shotgun/Toolkit is available, log the error message to the current engine.
+            if sgtk:
+                sgtk.platform.current_engine().logger.exception("Add new line failed.")
+            perform_undo = True
+        finally:
+            # End our undo block.
+            cur.endEditBlock()
+            # Check if the operation failed an roll back if it did.
+            if perform_undo:
+                self.undo()
+
+    return function_wrapper
+
 
 class PythonInputWidget(QtGui.QPlainTextEdit):
     """A simple python editor widget.
@@ -273,6 +313,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                 return True
         return False
 
+    @safe_modify_content
     def add_new_line(self):
         """
         Adds a new line from the cursor position.
@@ -280,10 +321,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         :return: None
         """
         cur = self.textCursor()
-
-        # beginEditBlock will start the undo block, we end it after making the changes.
-        # That ensures all the changes are recorded as one undo level.
-        cur.beginEditBlock()
 
         cur_pos, anchor, start, end = self._get_cursor_positions(cur)
 
@@ -317,10 +354,10 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         # Remove the currently selected text, as usually editors delete the selection and move onto the new line.
         self.textCursor().removeSelectedText()
-        cur.insertText(new_line)
-        # End our undo block.
-        cur.endEditBlock()
 
+        cur.insertText(new_line)
+
+    @safe_modify_content
     def block_comment_selection(self):
         """
         Either adds or removes comments from the selected line. If one line in the selection doesn't contain a comment
@@ -440,6 +477,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         end = cur_pos if cur_pos > anchor else anchor
         return cur_pos, anchor, start, end
 
+    @safe_modify_content
     def indent(self):
         """
         Will indent the selected lines with four spaces
@@ -462,6 +500,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
         self._operate_on_selected_lines(indent_line)
 
+    @safe_modify_content
     def unindent(self):
         """
         Will attempt to unindent the selected lines by removing four spaces or tab characters.
@@ -495,10 +534,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         cur = self.textCursor()
 
         cur_pos, anchor, start, end = self._get_cursor_positions(cur)
-
-        # Mark the beginning of the block edit and mark the end after the unindent changes so they are recorded as a
-        # single undo step.
-        cur.beginEditBlock()
 
         # Create new start and end points that we can modify whilst we are iterating of the lines performing
         # the operation so that we can use these to reselect the appropriate text at the end.
@@ -581,8 +616,6 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             cur.setPosition(new_start_pos, QtGui.QTextCursor.KeepAnchor)
 
         self.setTextCursor(cur)
-        # end our undo block.
-        cur.endEditBlock()
 
     def line_number_area_width(self):
         """Calculate the width of the line number area."""

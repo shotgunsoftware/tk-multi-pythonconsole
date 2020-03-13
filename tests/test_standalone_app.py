@@ -176,11 +176,12 @@ def test_execute_script(
 @pytest.mark.parametrize(
     "script, altered_script, operation, selection_range",
     [
+        # test adding an indent. Should round up to the nearest for spaces.
         (
             # source
             "a = 1\n"
             "    b = 2\n"
-            "c = 3",
+            " c = 3",
             # result
             "    a = 1\n"
             "        b = 2\n"
@@ -190,6 +191,7 @@ def test_execute_script(
             # cursor selection start and end position (None selects all)
             None,
         ),
+        # test unindenting. Should round up to the nearest for spaces.
         (
             # source
             "a = 1\n"
