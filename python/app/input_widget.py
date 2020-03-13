@@ -691,7 +691,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             base_color = palette.base().color()
             highlight_color = palette.highlight().color()
 
-            self._cur_line_color = colorize(base_color, 2, highlight_color, 1,)
+            self._cur_line_color = colorize(base_color, 6, highlight_color, 1,)
 
         return self._cur_line_color
 

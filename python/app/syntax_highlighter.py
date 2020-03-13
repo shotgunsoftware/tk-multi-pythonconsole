@@ -192,7 +192,7 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 style="",
             ),
             "comment": _format(
-                colorize(palette.windowText().color(), 1, palette.base().color(), 2,),
+                colorize(palette.windowText().color(), 1, palette.base().color(), 1,),
                 style="italic",
             ),
             "self": _format(
