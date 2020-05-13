@@ -280,7 +280,10 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                 event.accept()
             else:
                 super(PythonInputWidget, self).keyPressEvent(event)
-        elif event.key() == QtCore.Qt.Key_Slash:
+        elif (
+            event.key() == QtCore.Qt.Key_Slash
+            and event.modifiers() == QtCore.Qt.ControlModifier
+        ):
             self.block_comment_selection()
             event.accept()
         elif event.key() == QtCore.Qt.Key_Backtab:
