@@ -374,19 +374,21 @@ def test_block_text_operations(
     input_widget.setTextCursor(cur)
     QtCore.QCoreApplication.processEvents()
 
+    modifier = QtCore.Qt.NoModifier
     if operation == "indent":
         key = QtCore.Qt.Key_Tab
     elif operation == "unindent":
         key = QtCore.Qt.Key_Backtab
     elif operation == "comment":
         key = QtCore.Qt.Key_Slash
+        modifier = QtCore.Qt.ControlModifier
     elif operation == "delete":
         key = QtCore.Qt.Key_Backspace
     elif operation == "new_line":
         key = QtCore.Qt.Key_Return
 
     # Now simulate the key press for the correct operation.
-    event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, key, QtCore.Qt.NoModifier)
+    event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, key, modifier)
     QtCore.QCoreApplication.postEvent(input_widget, event)
     QtCore.QCoreApplication.processEvents()
 
