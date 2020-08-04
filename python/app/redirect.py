@@ -10,11 +10,6 @@
 
 import sys
 
-# NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
-# stand alone fashion. This try/except allows portions of the console to be imported outside of a
-# Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
-# engine running.
-
 from .qt_importer import QtCore
 
 
@@ -150,8 +145,21 @@ class StderrRedirector(QtCore.QObject):
 
         If tee, then also write to stderr.
         """
+        # Temporarily reset the original sys.stderr handler.
+        # We do this because output_widget.OutputStreamWidget.add_error
+        # which is triggered by the error signal might try log to
+        # the sgtk logger, which depending on the engine might
+        # try and print to stderr which would cause a loop.
+        sys.stderr = self._handle
+
         self.error.emit(msg)
         QtCore.QCoreApplication.processEvents()
 
         if self._tee:
             self._handle.write(msg)
+
+        # Now return the sys.stderr to self so that any further
+        # potential writes within the "with" continue to end up here.
+        # The __exit__ will ultimately reset it to the original stderr handler
+        # once the "with" exits.
+        sys.stderr = self
