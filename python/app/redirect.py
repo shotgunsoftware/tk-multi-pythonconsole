@@ -109,57 +109,30 @@ class StderrRedirector(QtCore.QObject):
 
     error = QtCore.Signal(str)
 
-    def __init__(self, tee=True, parent=None):
+    def __init__(self, parent=None):
         """Initialize the redirection object.
 
         :param tee: Also write to sys stderr when True.
         :param parent: The parent qt object.
         """
         super(StderrRedirector, self).__init__(parent)
-        self._handle = None
-        self._tee = tee
-
-    def __enter__(self):
-        """Begin redirection.
-
-        Temporarily assigns stderr to this object for writing.
-        """
-        self._handle = sys.stderr
-        sys.stderr = self
-        return self
-
-    def __exit__(self, type, value, traceback):
-        """Finish redirection.
-
-        Repoint sys.stderr to the original handle.
-        """
-        sys.stderr = self._handle
-
-    def flush(self):
-        """Nothing to emit for the redirector. Flush the original if tee'ing."""
-        if self._tee:
-            self._handle.flush()
 
     def write(self, msg):
         """Forward the written output to the error signal.
 
         If tee, then also write to stderr.
         """
-        # Temporarily reset the original sys.stderr handler.
-        # We do this because output_widget.OutputStreamWidget.add_error
-        # which is triggered by the error signal might try log to
-        # the sgtk logger, which depending on the engine might
-        # try and print to stderr which would cause a loop.
-        sys.stderr = self._handle
+
+        # Since this stderr redirector has its write method called directly
+        # (within input_widget) rather than any errors automatically being sent
+        # via sys.stderr, we don't need to redirect sys.stderr.
+        # Doing so might actually cause a loop, since else where
+        # in the app the error signal emitted from here, triggers the
+        # logging of the error to the engine and if the engine
+        # calls sys.stderr as part of its logging, we end up in a loop.
+        # As a result we don't need to implement the __enter__ and __exit__.
 
         self.error.emit(msg)
         QtCore.QCoreApplication.processEvents()
 
-        if self._tee:
-            self._handle.write(msg)
-
-        # Now return the sys.stderr to self so that any further
-        # potential writes within the "with" continue to end up here.
-        # The __exit__ will ultimately reset it to the original stderr handler
-        # once the "with" exits.
-        sys.stderr = self
+        sys.stderr.write(msg)
