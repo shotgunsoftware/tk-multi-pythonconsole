@@ -129,6 +129,14 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
         # All other rules
         rules += [
+            # Numeric literals
+            (r"\b[+-]?[0-9]+[lL]?\b", 0, self._style("numbers")),
+            (r"\b[+-]?0[xX][0-9A-Fa-f]+[lL]?\b", 0, self._style("numbers")),
+            (
+                r"\b[+-]?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b",
+                0,
+                self._style("numbers"),
+            ),
             # 'self'
             (r"\bself\b", 0, self._style("self")),
             # Double-quoted string, possibly containing escape sequences
@@ -141,14 +149,6 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             (r"\bclass\b\s*(\w+)", 1, self._style("defclass")),
             # From '#' until a newline
             (r"#[^\n]*", 0, self._style("comment")),
-            # Numeric literals
-            (r"\b[+-]?[0-9]+[lL]?\b", 0, self._style("numbers")),
-            (r"\b[+-]?0[xX][0-9A-Fa-f]+[lL]?\b", 0, self._style("numbers")),
-            (
-                r"\b[+-]?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b",
-                0,
-                self._style("numbers"),
-            ),
         ]
 
         # Build a QtCore.QRegExp for each pattern
@@ -156,55 +156,45 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def _style(self, style_type):
 
-        palette = self._palette
-
         styles = {
             "keyword": _format(
-                colorize(palette.windowText().color(), 3, QtGui.QColor(0, 0, 255), 1,),
+                QtGui.QColor(204, 120, 50),
                 style="",
             ),
             "builtin": _format(
-                colorize(palette.windowText().color(), 3, QtGui.QColor(0, 255, 0), 1,),
+                QtGui.QColor(136, 136, 198),
                 style="",
             ),
             "operator": _format(
-                colorize(
-                    palette.windowText().color(), 4, palette.highlight().color(), 2,
-                ),
+                QtGui.QColor(169, 183, 198),
                 style="",
             ),
             "brace": _format(
-                colorize(palette.windowText().color(), 2, palette.base().color(), 1,),
-                style="bold",
+                QtGui.QColor(169, 183, 198),
+                style="",
             ),
             "defclass": _format(
-                colorize(palette.windowText().color(), 3, QtGui.QColor(255, 0, 0), 1,),
+                QtGui.QColor(255, 198, 109),
                 style="bold",
             ),
             "string": _format(
-                colorize(
-                    palette.windowText().color(), 2, palette.highlight().color(), 1,
-                ),
+                QtGui.QColor(106, 135, 89),
                 style="bold",
             ),
             "string2": _format(
-                colorize(palette.windowText().color(), 1, palette.base().color(), 1,),
+                QtGui.QColor(98, 151, 85),
                 style="",
             ),
             "comment": _format(
-                colorize(palette.windowText().color(), 1, palette.base().color(), 1,),
+                QtGui.QColor(128, 128, 128),
                 style="italic",
             ),
             "self": _format(
-                colorize(
-                    palette.windowText().color(), 1, QtGui.QColor(127, 127, 127), 1,
-                ),
+                QtGui.QColor(148, 85, 141),
                 style="",
             ),
             "numbers": _format(
-                colorize(
-                    palette.windowText().color(), 3, QtGui.QColor(127, 127, 127), 1,
-                ),
+                QtGui.QColor(104, 151, 187),
                 style="",
             ),
         }
