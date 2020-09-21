@@ -205,8 +205,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                 python_code = compile(python_script, "python input", "exec")
             except SyntaxError:
                 # oops, syntax error. write to our stderr
-                with self._stderr_redirect as stderr:
-                    stderr.write(self._format_exc())
+                self._stderr_redirect.write(self._format_exc())
                 return
 
         # exec the python code, redirecting any stdout to the ouptut signal.
@@ -231,8 +230,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                         results = eval(python_code, self._locals, self._locals)
                     except Exception:
                         # oops, error encountered. write/redirect to the error signal
-                        with self._stderr_redirect as stderr:
-                            stderr.write(self._format_exc())
+                        self._stderr_redirect.write(self._format_exc())
                     else:
                         self.results.emit(str(results))
 
@@ -248,8 +246,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
                         exec(python_code, self._locals, self._locals)
                     except Exception:
                         # oops, error encountered. write/redirect to the error signal
-                        with self._stderr_redirect as stderr:
-                            stderr.write(self._format_exc())
+                        self._stderr_redirect.write(self._format_exc())
 
     def highlight_current_line(self):
         """Highlight the current line of the input widget."""
