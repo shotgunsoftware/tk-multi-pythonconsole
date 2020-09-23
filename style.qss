@@ -113,6 +113,7 @@ QScrollArea {
 
 QTextBrowser {
     border: none;
+    background-color: rgb(43, 43, 43);
 }
 
 QPlainTextEdit {
