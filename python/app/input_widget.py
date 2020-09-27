@@ -691,7 +691,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             base_color = palette.base().color()
             highlight_color = palette.highlight().color()
 
-            self._cur_line_color = colorize(base_color, 6, highlight_color, 1,)
+            self._cur_line_color = QtGui.QColor(50, 50, 50)
 
         return self._cur_line_color
 
@@ -703,11 +703,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """Get a line number base color."""
 
         if not hasattr(self, "_line_num_base_color"):
-            palette = self.palette()
-            base_color = palette.base().color()
-            window_color = palette.window().color()
-
-            self._line_num_base_color = colorize(base_color, 1, window_color, 1,)
+            self._line_num_base_color = QtGui.QColor(49, 51, 53)
 
         return self._line_num_base_color
 
@@ -715,12 +711,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         """Get a line number color."""
 
         if not hasattr(self, "_line_num_color"):
-
-            palette = self.palette()
-            base_color = palette.base().color()
-            highlight_color = palette.highlight().color()
-
-            self._line_num_color = colorize(base_color, 1, highlight_color, 2,)
+            self._line_num_color = QtGui.QColor(96, 99, 102)
 
         return self._line_num_color
 
