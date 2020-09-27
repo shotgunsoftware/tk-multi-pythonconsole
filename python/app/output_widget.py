@@ -155,7 +155,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         # if shotgun/toolkit is available, log the error message to the current
         # engine.
         if sgtk:
-            sgtk.platform.current_engine().log_error(text)
+            sgtk.platform.current_engine().logger.error(text)
 
         if six:
             # if six can be imported sanitize the string.
