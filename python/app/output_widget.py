@@ -131,10 +131,10 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
         if six:
             # if six can be imported sanitize the string.
-            # This may lead to unicode errors if not imported in python 2
+            # This may lead to unicode errors if not imported in Python 2
             text = six.ensure_str(text)
         else:
-            str(text)
+            text = str(text)
 
         with self._write_lock:
             text = self._to_html(text)
