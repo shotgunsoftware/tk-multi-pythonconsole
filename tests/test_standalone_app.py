@@ -36,6 +36,9 @@ def set_environment(current_path):
         if "tk-core" in a_path:
             sys.path.remove(a_path)
 
+    if "sgtk" in sys.modules:
+        del sys.modules["sgtk"]
+
 
 @pytest.fixture(scope="session")
 def imported_app(set_environment):
