@@ -172,13 +172,9 @@ def test_python_console(app_dialog):
     assert app_dialog.root.buttons[
         "Add a new tab"
     ].exists(), "Add a new tab button is missing"
-    assert app_dialog.root.tabs[
-        ".py"
-    ].exists(), ".py tab is missing"
+    assert app_dialog.root.tabs[".py"].exists(), ".py tab is missing"
     # Load a script
-    app_dialog.root[
-        "Load python script from a file."
-    ].mouseClick()
+    app_dialog.root["Load python script from a file."].mouseClick()
     app_dialog.root.dialogs["Open Python Script"].waitExist(timeout=30)
     open_script_path = os.path.normpath(
         os.path.expandvars("${TK_TEST_FIXTURES}/files/script/UiAutomationScript.py")
@@ -191,11 +187,13 @@ def test_python_console(app_dialog):
     app_dialog.root.buttons["Clear all output."].mouseClick()
     assert app_dialog.root.captions[""].exists()
     app_dialog.root.checkboxes["Echo python commands in output."].mouseClick()
-    assert app_dialog.root.checkboxes[
-        "Echo python commands in output."
-    ].selected is False, "Echo python commands in output checkbox should be disabled"
+    assert (
+        app_dialog.root.checkboxes["Echo python commands in output."].selected is False
+    ), "Echo python commands in output checkbox should be disabled"
     # Run the loaded script
-    app_dialog.root.buttons["Execute the current python script. Shortcut: Ctrl+Enter"].mouseClick()
+    app_dialog.root.buttons[
+        "Execute the current python script. Shortcut: Ctrl+Enter"
+    ].mouseClick()
     assert app_dialog.root.captions[
         "0\n1\n2"
     ].exists(), "Print Ci Automation is missing"
@@ -205,7 +203,9 @@ def test_python_console(app_dialog):
     app_dialog.root.textfields.mouseClick()
     app_dialog.root.textfields.pasteIn('print("Hello World!")')
     app_dialog.root.checkboxes["Show/hide line numbers."].mouseClick()
-    app_dialog.root.buttons["Execute the current python script. Shortcut: Ctrl+Enter"].mouseClick()
+    app_dialog.root.buttons[
+        "Execute the current python script. Shortcut: Ctrl+Enter"
+    ].mouseClick()
     assert app_dialog.root.captions[
         '*print("Hello World!")\nHello World!'
     ].exists(), "Print Hello World! is missing"
@@ -213,7 +213,9 @@ def test_python_console(app_dialog):
     app_dialog.root.buttons["Save current python script to a file."].mouseClick()
     app_dialog.root.dialogs["Save Python Script"].waitExist(timeout=30)
     save_script_path = os.path.normpath(
-        os.path.expandvars("${TK_TEST_FIXTURES}/files/script/UiAutomationScriptUpdated.py")
+        os.path.expandvars(
+            "${TK_TEST_FIXTURES}/files/script/UiAutomationScriptUpdated.py"
+        )
     )
     app_dialog.root.dialogs["Save Python Script"].textfields["File name:"].pasteIn(
         save_script_path, enter=True
