@@ -18,7 +18,6 @@ from tk_toolchain.authentication import get_toolkit_user
 
 try:
     from MA.UI import topwindows
-    from MA.UI import first
 except ImportError:
     pytestmark = pytest.mark.skip()
 
