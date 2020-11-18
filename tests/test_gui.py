@@ -197,16 +197,18 @@ def test_python_console(app_dialog):
     # Run the loaded script
     app_dialog.root.buttons["Execute the current python script. Shortcut: Ctrl+Enter"].mouseClick()
     assert app_dialog.root.captions[
-        "Hello World!"
-    ].exists(), "Print Hello World! is missing"
+        "0\n1\n2"
+    ].exists(), "Print Ci Automation is missing"
     # Edit the script
     app_dialog.root.buttons["Clear all input."].mouseClick()
+    app_dialog.root.buttons["Add a new tab"].mouseClick()
     app_dialog.root.textfields.mouseClick()
-    app_dialog.root.textfields.pasteIn('print("Ci Automation")')
+    app_dialog.root.textfields.pasteIn('print("Hello World!")')
+    app_dialog.root.checkboxes["Show/hide line numbers."].mouseClick()
     app_dialog.root.buttons["Execute the current python script. Shortcut: Ctrl+Enter"].mouseClick()
     assert app_dialog.root.captions[
-        "Hello World!*Ci Automation"
-    ].exists(), "Print Hello World! Ci Automation is missing"
+        '*print("Hello World!")\nHello World!'
+    ].exists(), "Print Hello World! is missing"
     # Save the updated script
     app_dialog.root.buttons["Save current python script to a file."].mouseClick()
     app_dialog.root.dialogs["Save Python Script"].waitExist(timeout=30)
