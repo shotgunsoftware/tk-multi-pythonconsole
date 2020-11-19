@@ -154,7 +154,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
         # if shotgun/toolkit is available, log the error message to the current
         # engine.
-        if sgtk:
+        if sgtk and sgtk.platform.current_engine():
             sgtk.platform.current_engine().logger.error(text)
 
         if six:
@@ -162,7 +162,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
             # This may lead to unicode errors if not imported in python 2
             text = six.ensure_str(text)
         else:
-            str(text)
+            text = str(text)
 
         # write the error
         with self._write_lock:
