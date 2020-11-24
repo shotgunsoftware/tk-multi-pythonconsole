@@ -142,9 +142,9 @@ class AppDialogAppWrapper(object):
         self.root.buttons["Close"].get().mouseClick()
 
 
-def test_python_console(app_dialog):
+def test_ui_validation(app_dialog):
     """
-    Quick UI validation of the Python Console
+    UI validation of the Python Console to make sure all widgets are available.
     """
     # Make sure all buttons and available
     assert app_dialog.root.buttons[
@@ -172,6 +172,12 @@ def test_python_console(app_dialog):
         "Add a new tab"
     ].exists(), "Add a new tab button is missing"
     assert app_dialog.root.tabs[".py"].exists(), ".py tab is missing"
+
+
+def test_load_script(app_dialog):
+    """
+    Make sure Python Console can load and run a python script
+    """
     # Load a script
     app_dialog.root["Load python script from a file."].mouseClick()
     app_dialog.root.dialogs["Open Python Script"].waitExist(timeout=30)
@@ -196,7 +202,13 @@ def test_python_console(app_dialog):
     assert app_dialog.root.captions[
         "0\n1\n2"
     ].exists(), "Print Ci Automation is missing"
-    # Edit the script
+
+
+def test_save_script(app_dialog):
+    """
+    Make sure Python Console can save a python script
+    """
+    # Crate a new tab, run and save a Python script
     app_dialog.root.buttons["Clear all input."].mouseClick()
     app_dialog.root.buttons["Add a new tab"].mouseClick()
     app_dialog.root.textfields.mouseClick()
@@ -218,4 +230,10 @@ def test_python_console(app_dialog):
     )
     app_dialog.root.dialogs["Save Python Script"].textfields["File name:"].pasteIn(
         save_script_path, enter=True
+    )
+    # Validate the file exist locally
+    assert os.path.isfile(
+        os.path.expandvars(
+            "${TK_TEST_FIXTURES}/files/script/UiAutomationScriptUpdated.py"
+        )
     )
