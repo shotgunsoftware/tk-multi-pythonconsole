@@ -237,7 +237,8 @@ def test_save_script(app_dialog):
     while not os.path.exists(save_script_path):
         time.sleep(1)
         time_counter += 1
-        if time_counter > time_to_wait:break
+        if time_counter > time_to_wait:
+            break
     # Validate the saved script exist locally
     assert os.path.isfile(save_script_path)
     # Validate saved script content
