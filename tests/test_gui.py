@@ -231,9 +231,12 @@ def test_save_script(app_dialog):
     app_dialog.root.dialogs["Save Python Script"].textfields["File name:"].pasteIn(
         save_script_path, enter=True
     )
-    # Validate the file exist locally
+    # Validate the saved script exist locally
     assert os.path.isfile(
         os.path.expandvars(
             "${TK_TEST_FIXTURES}/files/script/UiAutomationScriptUpdated.py"
         )
     )
+    # Validate saved script content
+    content = open(save_script_path).read()
+    assert content == 'print("Hello World!")'
