@@ -231,6 +231,13 @@ def test_save_script(app_dialog):
     app_dialog.root.dialogs["Save Python Script"].textfields["File name:"].pasteIn(
         save_script_path, enter=True
     )
+    # Wait until the saved script exist locally
+    time_to_wait = 10
+    time_counter = 0
+    while not os.path.exists(save_script_path):
+        time.sleep(1)
+        time_counter += 1
+        if time_counter > time_to_wait:break
     # Validate the saved script exist locally
     assert os.path.isfile(save_script_path)
     # Validate saved script content
