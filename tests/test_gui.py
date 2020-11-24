@@ -232,11 +232,7 @@ def test_save_script(app_dialog):
         save_script_path, enter=True
     )
     # Validate the saved script exist locally
-    assert os.path.isfile(
-        os.path.expandvars(
-            "${TK_TEST_FIXTURES}/files/script/UiAutomationScriptUpdated.py"
-        )
-    )
+    assert os.path.isfile(save_script_path)
     # Validate saved script content
     content = open(save_script_path).read()
     assert content == 'print("Hello World!")'
