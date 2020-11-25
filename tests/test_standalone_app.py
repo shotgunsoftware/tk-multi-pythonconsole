@@ -15,12 +15,12 @@ import os
 import io
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def current_path():
     return os.path.dirname(os.path.realpath(__file__))
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def set_environment(current_path):
     """
     Tests the python console standalone without sgtk being present.
@@ -32,12 +32,24 @@ def set_environment(current_path):
 
     # make sure tk-core is removed from the path so that
     # we can test the python console app standalone.
+    # store the removed paths so we can restore them after the test completes.
+    removed_paths = []
     for a_path in reversed(sys.path):
         if "tk-core" in a_path:
+            removed_paths.append(a_path)
             sys.path.remove(a_path)
 
+    if "sgtk" in sys.modules:
+        del sys.modules["sgtk"]
 
-@pytest.fixture(scope="session")
+    # Now yield so that the test runs.
+    yield
+
+    # Now restore the removed paths.
+    sys.path.extend(removed_paths)
+
+
+@pytest.fixture(scope="module")
 def imported_app(set_environment):
     import app as console_app
     from app.qt_importer import QtGui
