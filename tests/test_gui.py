@@ -39,7 +39,8 @@ def sg_project(shotgun):
     """
     # Make sure there is not already an automation project created
     project_name = (
-        "Toolkit Python Console UI Automation " + os.environ["SHOTGUN_TEST_ENTITY_SUFFIX"]
+        "Toolkit Python Console UI Automation "
+        + os.environ["SHOTGUN_TEST_ENTITY_SUFFIX"]
     )
     filters = [["name", "is", project_name]]
     existed_project = shotgun.find_one("Project", filters)
