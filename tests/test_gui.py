@@ -38,7 +38,10 @@ def sg_project(shotgun):
     Generates a fresh Shotgun Project to use with the Shotgun Python Console UI Automation.
     """
     # Make sure there is not already an automation project created
-    filters = [["name", "is", "Toolkit Python Console UI Automation"]]
+    project_name = (
+        "Toolkit Python Console UI Automation " + os.environ["SHOTGUN_TEST_ENTITY_SUFFIX"]
+    )
+    filters = [["name", "is", project_name]]
     existed_project = shotgun.find_one("Project", filters)
     if existed_project is not None:
         shotgun.delete(existed_project["type"], existed_project["id"])
@@ -46,7 +49,7 @@ def sg_project(shotgun):
     # Create a new project with the Film VFX Template
     project_data = {
         "sg_description": "Project Created by Automation",
-        "name": "Toolkit Python Console UI Automation",
+        "name": project_name,
     }
     new_project = shotgun.create("Project", project_data)
 
