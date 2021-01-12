@@ -39,7 +39,7 @@ def sg_project(shotgun):
     Generates a fresh Shotgun Project to use with the Shotgun Python Console UI Automation.
     """
     # Make sure there is not already an automation project created
-    project_name = create_unique_name("Toolkit Python Console UI Automation-")
+    project_name = create_unique_name("Toolkit Python Console UI Automation")
     filters = [["name", "is", project_name]]
     existed_project = shotgun.find_one("Project", filters)
     if existed_project is not None:
