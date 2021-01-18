@@ -14,7 +14,6 @@ import time
 import os
 import sys
 import sgtk
-from tk_toolchain.testing import shotgun, sg_project
 
 try:
     from MA.UI import topwindows
@@ -25,7 +24,7 @@ except ImportError:
 # This fixture will launch tk-run-app on first usage
 # and will remain valid until the test run ends.
 @pytest.fixture(scope="session")
-def host_application(sg_project):
+def host_application(tk_test_create_project):
     """
     Launch the host application for the Toolkit application.
 
@@ -47,9 +46,9 @@ def host_application(sg_project):
             "--location",
             os.path.dirname(__file__),
             "--context-entity-type",
-            sg_project["type"],
+            tk_test_create_project["type"],
             "--context-entity-id",
-            str(sg_project["id"]),
+            str(tk_test_create_project["id"]),
         ]
     )
     try:
