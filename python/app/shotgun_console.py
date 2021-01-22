@@ -103,7 +103,10 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
             # Default to the currently running engine. In some cases the current engine
             # is not set before this widget requires it (e.g. if an engine runs
             # tk-multi-pythonconsole at start up), so fallback to the app's engine.
-            self._engine = current_engine() or sgtk.platform.current_bundle().engine
+            try:
+                self._engine = current_engine() or sgtk.platform.current_bundle().engine
+            except Exception:
+                pass
 
             # If not running in an engine, then we're hosed.
             if not self._engine:
