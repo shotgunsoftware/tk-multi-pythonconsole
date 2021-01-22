@@ -42,14 +42,8 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
 
         super(ShotgunPythonConsoleWidget, self).__init__(parent)
 
-        engine = current_engine()
+        self._engine = None
         self._settings_manager = settings.UserSettings(sgtk.platform.current_bundle())
-
-        # if not running in an engine, then we're hosed
-        if not engine:
-            raise TankError(
-                "Unable to initialize ShotgunPythonConsole. No engine running"
-            )
 
         # add a welcome message to the output widget
         welcome_message = (
@@ -99,6 +93,26 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         app = QtGui.QApplication.instance()
         app.aboutToQuit.connect(self._save_settings)
 
+    @property
+    def engine(self):
+        """
+        Property for the engine associated with the Shotgun Console.
+        """
+
+        if not self._engine:
+            # Default to the currently running engine. In some cases the current engine
+            # is not set before this widget requires it (e.g. if an engine runs
+            # tk-multi-pythonconsole at start up), so fallback to the app's engine.
+            self._engine = current_engine() or sgtk.platform.current_bundle().engine
+
+            # If not running in an engine, then we're hosed.
+            if not self._engine:
+                raise TankError(
+                    "Unable to initialize ShotgunPythonConsole. No engine running"
+                )
+
+        return self._engine
+
     def closeEvent(self, event):
         """
         Handles saving settings for the console before it is closed.
@@ -116,12 +130,11 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         Returns a dict of sg globals for the current engine.
         """
 
-        engine = current_engine()
         return {
-            "tk": engine.tank,
-            "shotgun": engine.shotgun,
-            "context": engine.context,
-            "engine": engine,
+            "tk": self.engine.tank,
+            "shotgun": self.engine.shotgun,
+            "context": self.engine.context,
+            "engine": self.engine,
         }
 
     def _save_settings(self):
