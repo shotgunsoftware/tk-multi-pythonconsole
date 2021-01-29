@@ -14,8 +14,6 @@ import time
 import os
 import sys
 import sgtk
-from tk_toolchain.authentication import get_toolkit_user
-from tk_toolchain.testing import create_unique_name
 
 try:
     from MA.UI import topwindows
@@ -23,42 +21,10 @@ except ImportError:
     pytestmark = pytest.mark.skip()
 
 
-@pytest.fixture(scope="session")
-def shotgun():
-    """
-    Getting credentials from TK_TOOLCHAIN
-    """
-    sg = get_toolkit_user().create_sg_connection()
-
-    return sg
-
-
-@pytest.fixture(scope="session")
-def sg_project(shotgun):
-    """
-    Generates a fresh Shotgun Project to use with the Shotgun Python Console UI Automation.
-    """
-    # Make sure there is not already an automation project created
-    project_name = create_unique_name("Toolkit Python Console UI Automation")
-    filters = [["name", "is", project_name]]
-    existed_project = shotgun.find_one("Project", filters)
-    if existed_project is not None:
-        shotgun.delete(existed_project["type"], existed_project["id"])
-
-    # Create a new project with the Film VFX Template
-    project_data = {
-        "sg_description": "Project Created by Automation",
-        "name": project_name,
-    }
-    new_project = shotgun.create("Project", project_data)
-
-    return new_project
-
-
 # This fixture will launch tk-run-app on first usage
 # and will remain valid until the test run ends.
 @pytest.fixture(scope="session")
-def host_application(sg_project):
+def host_application(tk_test_project):
     """
     Launch the host application for the Toolkit application.
 
@@ -80,9 +46,9 @@ def host_application(sg_project):
             "--location",
             os.path.dirname(__file__),
             "--context-entity-type",
-            sg_project["type"],
+            tk_test_project["type"],
             "--context-entity-id",
-            str(sg_project["id"]),
+            str(tk_test_project["id"]),
         ]
     )
     try:
