@@ -33,7 +33,7 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
 
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, engine=None):
         """
         Initialize the console widget.
 
@@ -42,14 +42,16 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
 
         super(ShotgunPythonConsoleWidget, self).__init__(parent)
 
-        engine = current_engine()
-        self._settings_manager = settings.UserSettings(sgtk.platform.current_bundle())
+        # Use the engine passed in or default to the current engine
+        self._engine = engine or current_engine()
 
         # if not running in an engine, then we're hosed
-        if not engine:
+        if not self._engine:
             raise TankError(
                 "Unable to initialize ShotgunPythonConsole. No engine running"
             )
+
+        self._settings_manager = settings.UserSettings(sgtk.platform.current_bundle())
 
         # add a welcome message to the output widget
         welcome_message = (
@@ -116,12 +118,11 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         Returns a dict of sg globals for the current engine.
         """
 
-        engine = current_engine()
         return {
-            "tk": engine.tank,
-            "shotgun": engine.shotgun,
-            "context": engine.context,
-            "engine": engine,
+            "tk": self._engine.tank,
+            "shotgun": self._engine.shotgun,
+            "context": self._engine.context,
+            "engine": self._engine,
         }
 
     def _save_settings(self):

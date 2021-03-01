@@ -72,6 +72,7 @@ class PythonConsoleApp(sgtk.platform.Application):
             "Python Console",
             self,
             app_payload.shotgun_console.ShotgunPythonConsoleWidget,
+            engine=self.engine,
         )
         self._current_dialog = widget
         return widget
@@ -93,6 +94,7 @@ class PythonConsoleApp(sgtk.platform.Application):
                 "Shotgun Python Console",
                 self,
                 app_payload.shotgun_console.ShotgunPythonConsoleWidget,
+                engine=self.engine,
             )
         except AttributeError as e:
             # just to gracefully handle older engines and older cores
