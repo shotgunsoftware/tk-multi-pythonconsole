@@ -55,10 +55,10 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
 
         # add a welcome message to the output widget
         welcome_message = (
-            "Welcome to the Shotgun Python Console!\n\n"
+            "Welcome to the SG Python Console!\n\n"
             "Python %s\n\n"
             "- A tk API handle is available via the 'tk' variable\n"
-            "- A Shotgun API handle is available via the 'shotgun' variable\n"
+            "- A SG API handle is available via the 'shotgun' variable\n"
             "- Your current context is stored in the 'context' variable\n"
             "- The shell engine can be accessed via the 'engine' variable\n\n"
             % (sys.version,)

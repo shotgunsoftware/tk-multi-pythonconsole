@@ -98,7 +98,7 @@ class AppDialogAppWrapper(object):
         """
         :param root:
         """
-        self.root = parent["Shotgun: Shotgun Python Console"].get()
+        self.root = parent["SG: SG Python Console"].get()
 
     def exists(self):
         """
