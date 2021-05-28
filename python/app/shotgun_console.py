@@ -48,7 +48,7 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         # if not running in an engine, then we're hosed
         if not self._engine:
             raise TankError(
-                "Unable to initialize ShotgunPythonConsole. No engine running"
+                "Unable to initialize ShotGridPythonConsole. No engine running"
             )
 
         self._settings_manager = settings.UserSettings(sgtk.platform.current_bundle())
