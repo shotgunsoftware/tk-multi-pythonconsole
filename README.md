@@ -18,4 +18,4 @@ working on. For an overview of all the Apps and Engines in the Toolkit App Store
 click here: https://developer.shotgridsoftware.com/d587be80/?title=Integrations+User+Guide
 
 ## Have a Question?
-Don't hesitate to contact us! You can find us on knowledge.autodesk.com/contact-support
+Don't hesitate to contact us! You can find us on https://knowledge.autodesk.com/contact-support
