@@ -12,6 +12,7 @@
 
 # The path to output all built .py files to:
 UI_PYTHON_PATH=../python/app/ui
+PYTHON_BASE="/Applications/Shotgun.app/Contents/Resources/Python"
 
 # Remove any problematic profiles from pngs.
 for f in *.png; do mogrify $f; done
@@ -27,7 +28,7 @@ function build_qt {
     # On OSX sed doesn't interpret \n as a new line. Instead we must insert the new line string
     lf=$'\n'
 
-    sed -i "" -e "s/\(from PySide import \(.*\)\)/try:\\$lf    from sgtk.platform.qt import \2\\$lf\except ImportError:\\$lf    try:\\$lf        from PySide2 import \2\\$lf    except ImportError:\\$lf        \1/g" -e "/# Created:/d" $UI_PYTHON_PATH/$3.py
+    sed -i $UI_PYTHON_PATH/$3.py -e "s/\(from PySide import \(.*\)\)/try:\\$lf    from sgtk.platform.qt import \2\\$lf\except ImportError:\\$lf    try:\\$lf        from PySide2 import \2\\$lf    except ImportError:\\$lf        \1/g" -e "/# Created:/d"
     # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
     # stand alone fashion. This try/except allows portions of the console to be imported outside of a
     # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
@@ -35,11 +36,11 @@ function build_qt {
 }
 
 function build_ui {
-    build_qt "pyside-uic --from-imports" "$1.ui" "$1"
+    build_qt "${PYTHON_BASE}/bin/python ${PYTHON_BASE}/bin/pyside-uic --from-imports" "$1.ui" "$1"
 }
 
 function build_res {
-    build_qt "pyside-rcc -py3" "$1.qrc" "$1_rc"
+    build_qt "${PYTHON_BASE}/bin/pyside-rcc -py3" "$1.qrc" "$1_rc"
 }
 
 
