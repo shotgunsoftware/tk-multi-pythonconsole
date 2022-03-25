@@ -14,7 +14,7 @@ resources:
     - repository: templates
       type: github
       name: shotgunsoftware/tk-ci-tools
-      ref: 0c68d6545bc4b7e3648e4388dd0447fe1394b700
+      ref: dev/mathurf/SG-24427_python3_ui_automation
       endpoint: shotgunsoftware
 
 # We want builds to trigger for 3 reasons:
