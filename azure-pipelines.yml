@@ -14,7 +14,7 @@ resources:
     - repository: templates
       type: github
       name: shotgunsoftware/tk-ci-tools
-      ref: 9512f114001c9a46dc1c8ca6cbcd636891a46ed3
+      ref: 8f2e319a7303730685f8ea94eec6f02f0c9082b9
       endpoint: shotgunsoftware
 
 # We want builds to trigger for 3 reasons:
