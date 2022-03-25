@@ -115,30 +115,40 @@ def test_ui_validation(app_dialog):
     UI validation of the Python Console to make sure all widgets are available.
     """
     # Make sure all buttons and available
-    assert app_dialog.root.buttons[
-        "Clear all output."
-    ].exists(), "Clear all output button is missing"
-    assert app_dialog.root.checkboxes[
-        "Echo python commands in output."
-    ].exists(), "Echo python commands in output checkbox is missing"
-    assert app_dialog.root.buttons[
-        "Execute the current python script. Shortcut: Ctrl+Enter"
-    ].exists(), "Execute current python commands button is missing"
-    assert app_dialog.root.buttons[
-        "Save current python script to a file."
-    ].exists(), "Save current python script to a file button is missing"
-    assert app_dialog.root[
-        "Load python script from a file."
-    ].exists(), "Load python script from a file drop down button is missing"
-    assert app_dialog.root.buttons[
-        "Clear all input."
-    ].exists(), "Clear all input button is missing"
-    assert app_dialog.root.checkboxes[
-        "Show/hide line numbers."
-    ].exists(), "Show/hide line numbers checkbox is missing"
-    assert app_dialog.root.buttons[
-        "Add a new tab"
-    ].exists(), "Add a new tab button is missing"
+    assert (
+        app_dialog.root.buttons["Clear all output."].exists()
+        or app_dialog.root.buttons[4].exists()
+    ), "Clear all output button is missing"
+    assert (
+        app_dialog.root.checkboxes["Echo python commands in output."].exists()
+        or app_dialog.root.checkboxes[0].exists()
+    ), "Echo python commands in output checkbox is missing"
+    assert (
+        app_dialog.root.buttons[
+            "Execute the current python script. Shortcut: Ctrl+Enter"
+        ].exists()
+        or app_dialog.root.buttons[6].exists()
+    ), "Execute current python commands button is missing"
+    assert (
+        app_dialog.root.buttons["Save current python script to a file."].exists()
+        or app_dialog.root.buttons[7].exists()
+    ), "Save current python script to a file button is missing"
+    assert (
+        app_dialog.root["Load python script from a file."].exists()
+        or app_dialog.root.buttons[8].exists()
+    ), "Load python script from a file drop down button is missing"
+    assert (
+        app_dialog.root.buttons["Clear all input."].exists()
+        or app_dialog.root.buttons[9].exists()
+    ), "Clear all input button is missing"
+    assert (
+        app_dialog.root.checkboxes["Show/hide line numbers."].exists()
+        or app_dialog.root.checkboxes[1].exists()
+    ), "Show/hide line numbers checkbox is missing"
+    assert (
+        app_dialog.root.buttons["Add a new tab"].exists()
+        or app_dialog.root.buttons[5].exists()
+    ), "Add a new tab button is missing"
     assert app_dialog.root.tabs[".py"].exists(), ".py tab is missing"
 
 
@@ -147,7 +157,10 @@ def test_load_script(app_dialog):
     Make sure Python Console can load and run a python script
     """
     # Load a script
-    app_dialog.root["Load python script from a file."].mouseClick()
+    if app_dialog.root["Load python script from a file."].exists() is True:
+        app_dialog.root["Load python script from a file."].mouseClick()
+    else:
+        app_dialog.root.buttons[8].mouseClick()
     app_dialog.root.dialogs["Open Python Script"].waitExist(timeout=30)
     open_script_path = os.path.normpath(
         os.path.expandvars("${TK_TEST_FIXTURES}/files/script/UiAutomationScript.py")
@@ -157,19 +170,37 @@ def test_load_script(app_dialog):
     )
     app_dialog.root.tabs["UiAutomationScript.py"].waitExist()
     # Clear output dialog and disable echo python commands
-    app_dialog.root.buttons["Clear all output."].mouseClick()
-    assert app_dialog.root.captions[""].exists()
-    app_dialog.root.checkboxes["Echo python commands in output."].mouseClick()
-    assert (
-        app_dialog.root.checkboxes["Echo python commands in output."].selected is False
-    ), "Echo python commands in output checkbox should be disabled"
+    if app_dialog.root.buttons["Clear all output."].exists() is True:
+        app_dialog.root.buttons["Clear all output."].mouseClick()
+        assert app_dialog.root.captions[""].exists()
+    else:
+        app_dialog.root.buttons[4].mouseClick()
+    if app_dialog.root.checkboxes["Echo python commands in output."].exists() is True:
+        app_dialog.root.checkboxes["Echo python commands in output."].mouseClick()
+        assert (
+            app_dialog.root.checkboxes["Echo python commands in output."].selected
+            is False
+        ), "Echo python commands in output checkbox should be disabled"
+    else:
+        app_dialog.root.checkboxes[0].mouseClick()
+        assert (
+            app_dialog.root.checkboxes[0].checked is False
+        ), "Echo python commands in output checkbox should be disabled"
     # Run the loaded script
-    app_dialog.root.buttons[
-        "Execute the current python script. Shortcut: Ctrl+Enter"
-    ].mouseClick()
-    assert app_dialog.root.captions[
-        "0\n1\n2"
-    ].exists(), "Print Ci Automation is missing"
+    if (
+        app_dialog.root.buttons[
+            "Execute the current python script. Shortcut: Ctrl+Enter"
+        ].exists()
+        is True
+    ):
+        app_dialog.root.buttons[
+            "Execute the current python script. Shortcut: Ctrl+Enter"
+        ].mouseClick()
+        assert app_dialog.root.captions[
+            "0\n1\n2"
+        ].exists(), "Print Ci Automation is missing"
+    else:
+        app_dialog.root.buttons[6].mouseClick()
 
 
 def test_save_script(app_dialog):
@@ -177,19 +208,42 @@ def test_save_script(app_dialog):
     Make sure Python Console can save a python script
     """
     # Crate a new tab, run and save a Python script
-    app_dialog.root.buttons["Clear all input."].mouseClick()
-    app_dialog.root.buttons["Add a new tab"].mouseClick()
+    if app_dialog.root.buttons["Clear all input."].exists() is True:
+        app_dialog.root.buttons["Clear all input."].mouseClick()
+    else:
+        app_dialog.root.buttons[9].mouseClick()
+    if app_dialog.root.buttons["Add a new tab"].exists() is True:
+        app_dialog.root.buttons["Add a new tab"].mouseClick()
+    else:
+        app_dialog.root.buttons[5].mouseClick()
     app_dialog.root.textfields.mouseClick()
     app_dialog.root.textfields.pasteIn('print("Hello World!")')
-    app_dialog.root.checkboxes["Show/hide line numbers."].mouseClick()
-    app_dialog.root.buttons[
-        "Execute the current python script. Shortcut: Ctrl+Enter"
-    ].mouseClick()
-    assert app_dialog.root.captions[
-        '*print("Hello World!")\nHello World!'
-    ].exists(), "Print Hello World! is missing"
+    if app_dialog.root.checkboxes["Show/hide line numbers."].exists() is True:
+        app_dialog.root.checkboxes["Show/hide line numbers."].mouseClick()
+    else:
+        app_dialog.root.checkboxes[1].mouseClick()
+    if (
+        app_dialog.root.buttons[
+            "Execute the current python script. Shortcut: Ctrl+Enter"
+        ].exists()
+        is True
+    ):
+        app_dialog.root.buttons[
+            "Execute the current python script. Shortcut: Ctrl+Enter"
+        ].mouseClick()
+        assert app_dialog.root.captions[
+            '*print("Hello World!")\nHello World!'
+        ].exists(), "Print Hello World! is missing"
+    else:
+        app_dialog.root.buttons[6].mouseClick()
     # Save the updated script
-    app_dialog.root.buttons["Save current python script to a file."].mouseClick()
+    if (
+        app_dialog.root.buttons["Save current python script to a file."].exists()
+        is True
+    ):
+        app_dialog.root.buttons["Save current python script to a file."].mouseClick()
+    else:
+        app_dialog.root.buttons[7].mouseClick()
     app_dialog.root.dialogs["Save Python Script"].waitExist(timeout=30)
     save_script_path = os.path.normpath(
         os.path.expandvars(
