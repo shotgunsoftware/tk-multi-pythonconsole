@@ -15,11 +15,12 @@ import os
 import sys
 import sgtk
 
-try:
-    from MA.UI import topwindows
-except ImportError:
-    pytestmark = pytest.mark.skip()
-    print("Import MA.UI failed")
+from MA.UI import topwindows
+# try:
+    # from MA.UI import topwindows
+# except ImportError:
+    # pytestmark = pytest.mark.skip()
+    # print("Import MA.UI failed")
 
 
 # This fixture will launch tk-run-app on first usage
