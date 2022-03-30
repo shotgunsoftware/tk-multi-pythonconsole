@@ -32,8 +32,7 @@ from .util import colorize
 
 
 def _format(color, style=""):
-    """Return a QtGui.QTextCharFormat with the given attributes.
-    """
+    """Return a QtGui.QTextCharFormat with the given attributes."""
 
     _format = QtGui.QTextCharFormat()
     _format.setForeground(color)
@@ -157,23 +156,52 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def _style(self, style_type):
 
         styles = {
-            "keyword": _format(QtGui.QColor(204, 120, 50), style="",),
-            "builtin": _format(QtGui.QColor(136, 136, 198), style="",),
-            "operator": _format(QtGui.QColor(169, 183, 198), style="",),
-            "brace": _format(QtGui.QColor(169, 183, 198), style="",),
-            "defclass": _format(QtGui.QColor(255, 198, 109), style="bold",),
-            "string": _format(QtGui.QColor(106, 135, 89), style="bold",),
-            "string2": _format(QtGui.QColor(98, 151, 85), style="",),
-            "comment": _format(QtGui.QColor(128, 128, 128), style="italic",),
-            "self": _format(QtGui.QColor(148, 85, 141), style="",),
-            "numbers": _format(QtGui.QColor(104, 151, 187), style="",),
+            "keyword": _format(
+                QtGui.QColor(204, 120, 50),
+                style="",
+            ),
+            "builtin": _format(
+                QtGui.QColor(136, 136, 198),
+                style="",
+            ),
+            "operator": _format(
+                QtGui.QColor(169, 183, 198),
+                style="",
+            ),
+            "brace": _format(
+                QtGui.QColor(169, 183, 198),
+                style="",
+            ),
+            "defclass": _format(
+                QtGui.QColor(255, 198, 109),
+                style="bold",
+            ),
+            "string": _format(
+                QtGui.QColor(106, 135, 89),
+                style="bold",
+            ),
+            "string2": _format(
+                QtGui.QColor(98, 151, 85),
+                style="",
+            ),
+            "comment": _format(
+                QtGui.QColor(128, 128, 128),
+                style="italic",
+            ),
+            "self": _format(
+                QtGui.QColor(148, 85, 141),
+                style="",
+            ),
+            "numbers": _format(
+                QtGui.QColor(104, 151, 187),
+                style="",
+            ),
         }
 
         return styles[style_type]
 
     def highlightBlock(self, text):
-        """Apply syntax highlighting to the given block of text.
-        """
+        """Apply syntax highlighting to the given block of text."""
         # Do other syntax formatting
         for expression, nth, format in self.rules:
             index = expression.indexIn(text, 0)
