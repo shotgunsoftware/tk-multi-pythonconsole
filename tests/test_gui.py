@@ -15,8 +15,6 @@ import os
 import sys
 import sgtk
 
-from MA.UI import topwindows
-
 try:
     from MA.UI import topwindows
 except ImportError:
