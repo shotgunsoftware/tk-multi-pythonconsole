@@ -153,6 +153,7 @@ def test_ui_validation(app_dialog):
     assert app_dialog.root.tabs[".py"].exists(), ".py tab is missing"
 
 
+@pytest.mark.skip()
 def test_load_script(app_dialog):
     """
     Make sure Python Console can load and run a python script
@@ -204,6 +205,7 @@ def test_load_script(app_dialog):
         app_dialog.root.buttons[6].mouseClick()
 
 
+@pytest.mark.skip()
 def test_save_script(app_dialog):
     """
     Make sure Python Console can save a python script
