@@ -178,7 +178,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # If the selection obtained from an editor spans a line break, the
         # text will contain a Unicode U+2029 paragraph separator character
         # instead of a newline \n character.
-        python_script = python_script.replace(u"\u2029", "\n")
+        python_script = python_script.replace("\u2029", "\n")
         python_script = str(python_script).strip()
 
         if not python_script:

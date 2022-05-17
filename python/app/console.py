@@ -244,7 +244,8 @@ class PythonConsoleWidget(QtGui.QWidget):
         with io.open(path, "r", encoding="utf-8") as fh:
             python_script = "".join(fh.readlines())
             index = self.tabs.add_tab(
-                name=os.path.split(path)[-1], contents=python_script,
+                name=os.path.split(path)[-1],
+                contents=python_script,
             )
             widget = self.tabs.widget(index)
             widget.input_widget.setPlainText(python_script)
@@ -532,7 +533,10 @@ class _PythonInputInfoWidget(QtGui.QWidget):
         layout.addWidget(self._column_lbl)
 
         self._text_grey = colorize(
-            self.palette().window().color(), 1, self.palette().windowText().color(), 1,
+            self.palette().window().color(),
+            1,
+            self.palette().windowText().color(),
+            1,
         ).name()
 
     def set_current_column(self, col):
@@ -542,5 +546,9 @@ class _PythonInputInfoWidget(QtGui.QWidget):
         :param int col: The column number to display.
         """
         self._column_lbl.setText(
-            "<font color='%s'>col: %s</font>" % (self._text_grey, str(col),)
+            "<font color='%s'>col: %s</font>"
+            % (
+                self._text_grey,
+                str(col),
+            )
         )
