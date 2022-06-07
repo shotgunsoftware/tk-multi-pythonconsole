@@ -111,6 +111,7 @@ class AppDialogAppWrapper(object):
         self.root.buttons["Close"].get().mouseClick()
 
 
+@pytest.mark.skip()
 def test_ui_validation(app_dialog):
     """
     UI validation of the Python Console to make sure all widgets are available.
