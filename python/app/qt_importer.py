@@ -19,24 +19,27 @@ try:
 except ImportError:
     __PySide_QtGui = None
     __PySide_QtWidgets = None
+    imported_qt = False
     try:
         # Try to import from PySide2
         from PySide2 import QtCore
         import PySide2.QtGui as __PySide_QtGui
         import PySide2.QtWidgets as __PySide_QtWidgets
+        imported_qt = True
     except ImportError:
         pass
 
-    if __PySide_QtGui is None or __PySide_QtWidgets is None:
+    if not imported_qt:
         # Try PySide6
         try:
             from PySide6 import QtCore
             import PySide6.QtGui as __PySide_QtGui
             import PySide6.QtWidgets as __PySide_QtWidgets
+            imported_qt = True
         except ImportError:
             pass
 
-    if __PySide_QtGui is None or __PySide_QtWidgets is None:
+    if not imported_qt:
         # Try PySide
         from PySide import QtCore, QtGui
     else:
@@ -54,6 +57,7 @@ except ImportError:
                     setattr(dst, name, getattr(src, name))
 
         import types
+
         QtGui = types.ModuleType("PySide.QtGui")
 
         # Combine the attributes of the QtWidgets and QtGui into a new QtGui module.
