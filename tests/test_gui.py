@@ -98,9 +98,7 @@ class AppDialogAppWrapper(object):
         """
         :param root:
         """
-        self.root = parent[
-            "PTR: Flow Production Tracking Python Console"
-        ].get()
+        self.root = parent["PTR: Flow Production Tracking Python Console"].get()
 
     def exists(self):
         """
