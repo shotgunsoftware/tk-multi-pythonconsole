@@ -55,7 +55,7 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
 
         # add a welcome message to the output widget
         welcome_message = (
-            "Welcome to the PTR Python Console!\n\n"
+            "Welcome to the Flow Production Tracking Python Console!\n\n"
             "Python %s\n\n"
             "- A tk API handle is available via the 'tk' variable\n"
             "- A PTR API handle is available via the 'shotgun' variable\n"
