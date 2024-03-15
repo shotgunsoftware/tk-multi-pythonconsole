@@ -53,7 +53,7 @@ class PythonConsoleApp(sgtk.platform.Application):
         # also register a menu entry on the shotgun menu so that users
         # can launch the panel
         self.engine.register_command(
-            "Python Console...",
+            "PTR Python Console...",
             self.create_panel,
             {"type": "context_menu", "short_name": "python_console"},
         )
