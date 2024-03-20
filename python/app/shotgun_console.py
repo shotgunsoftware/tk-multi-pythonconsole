@@ -48,17 +48,17 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         # if not running in an engine, then we're hosed
         if not self._engine:
             raise TankError(
-                "Unable to initialize ShotGridPythonConsole. No engine running"
+                "Unable to initialize FlowProductionTrackingPythonConsole. No engine running"
             )
 
         self._settings_manager = settings.UserSettings(sgtk.platform.current_bundle())
 
         # add a welcome message to the output widget
         welcome_message = (
-            "Welcome to the SG Python Console!\n\n"
+            "Welcome to the Flow Production Tracking Python Console!\n\n"
             "Python %s\n\n"
             "- A tk API handle is available via the 'tk' variable\n"
-            "- A SG API handle is available via the 'shotgun' variable\n"
+            "- A PTR API handle is available via the 'shotgun' variable\n"
             "- Your current context is stored in the 'context' variable\n"
             "- The shell engine can be accessed via the 'engine' variable\n\n"
             % (sys.version,)
