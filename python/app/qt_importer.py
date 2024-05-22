@@ -41,11 +41,8 @@ except ImportError:
         except ImportError:
             pass
 
-    if not imported_qt:
-        # Try PySide
-        from PySide import QtCore, QtGui
     else:
-        # Patch PySide2/PySide6 to keep the QtGui interface consistent with PySide (Qt 4).
+        # Patch PySide2/PySide6 to keep the QtGui interface consistent.
         # We don't try to cover all cases, only the QtGui module as we are using components
         # from that which are different between Qt 5 and 4. Approach is taken from the
         # `tk-core` `pyside2_patcher.py` module.
@@ -68,10 +65,5 @@ except ImportError:
 
 
 # Handle QRegExp / QRegularExpression
-if hasattr(QtCore, "QRegularExpression"):
-    qt_re_module = QtCore.QRegularExpression
-    qt_re_module_is_regular_expression = True
-else:
-    # NOTE remove once Qt4 support is removed
-    qt_re_module = QtCore.QRegExp
-    qt_re_module_is_regular_expression = False
+qt_re_module = QtCore.QRegularExpression
+qt_re_module_is_regular_expression = True
