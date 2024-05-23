@@ -32,14 +32,9 @@ except ImportError:
 
     if not imported_qt:
         # Try PySide6
-        try:
-            from PySide6 import QtCore
-            import PySide6.QtGui as __PySide_QtGui
-            import PySide6.QtWidgets as __PySide_QtWidgets
-
-            imported_qt = True
-        except ImportError:
-            pass
+        from PySide6 import QtCore
+        import PySide6.QtGui as __PySide_QtGui
+        import PySide6.QtWidgets as __PySide_QtWidgets
 
     else:
         # Patch PySide2/PySide6 to keep the QtGui interface consistent.
