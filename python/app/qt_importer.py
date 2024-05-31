@@ -35,8 +35,9 @@ except ImportError:
         from PySide6 import QtCore
         import PySide6.QtGui as __PySide_QtGui
         import PySide6.QtWidgets as __PySide_QtWidgets
+        imported_qt = True
 
-    else:
+    if imported_qt:
         # Patch PySide2/PySide6 to keep the QtGui interface consistent.
         # We don't try to cover all cases, only the QtGui module as we are using components
         # from that which are different between Qt 5 and 4. Approach is taken from the
@@ -57,8 +58,3 @@ except ImportError:
         # Combine the attributes of the QtWidgets and QtGui into a new QtGui module.
         _move_attributes(QtGui, __PySide_QtWidgets, dir(__PySide_QtWidgets))
         _move_attributes(QtGui, __PySide_QtGui, dir(__PySide_QtGui))
-
-
-# Handle QRegExp / QRegularExpression
-qt_re_module = QtCore.QRegularExpression
-qt_re_module_is_regular_expression = True
