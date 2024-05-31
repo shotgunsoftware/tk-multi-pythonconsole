@@ -38,7 +38,7 @@ except ImportError:
         imported_qt = True
 
     if imported_qt:
-        # Patch PySide2/PySide6 to keep the QtGui interface consistent.
+        # Patch PySide2/PySide6 to keep the QtGui interface consistent with PySide (Qt 4).
         # We don't try to cover all cases, only the QtGui module as we are using components
         # from that which are different between Qt 5 and 4. Approach is taken from the
         # `tk-core` `pyside2_patcher.py` module.
