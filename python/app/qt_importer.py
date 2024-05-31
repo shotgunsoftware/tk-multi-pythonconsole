@@ -35,6 +35,7 @@ except ImportError:
         from PySide6 import QtCore
         import PySide6.QtGui as __PySide_QtGui
         import PySide6.QtWidgets as __PySide_QtWidgets
+
         imported_qt = True
 
     if imported_qt:

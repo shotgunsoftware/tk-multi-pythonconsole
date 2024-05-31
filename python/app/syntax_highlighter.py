@@ -151,7 +151,9 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         ]
 
         # Build a QtCore.QRegularExpression for each pattern
-        self.rules = [(QtCore.QRegularExpression(pat), index, fmt) for (pat, index, fmt) in rules]
+        self.rules = [
+            (QtCore.QRegularExpression(pat), index, fmt) for (pat, index, fmt) in rules
+        ]
 
     def _style(self, style_type):
 
@@ -213,9 +215,7 @@ class PythonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         inside a multi-line string when this function is finished.
         """
 
-        return self.match_multiline_regular_expression(
-            text, delimiter, in_state, style
-        )
+        return self.match_multiline_regular_expression(text, delimiter, in_state, style)
 
     def highlight_block_regular_expression(self, text):
         """Apply syntax highlighting to the given block of text using QRegularExpression."""
