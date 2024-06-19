@@ -32,19 +32,13 @@ except ImportError:
 
     if not imported_qt:
         # Try PySide6
-        try:
-            from PySide6 import QtCore
-            import PySide6.QtGui as __PySide_QtGui
-            import PySide6.QtWidgets as __PySide_QtWidgets
+        from PySide6 import QtCore
+        import PySide6.QtGui as __PySide_QtGui
+        import PySide6.QtWidgets as __PySide_QtWidgets
 
-            imported_qt = True
-        except ImportError:
-            pass
+        imported_qt = True
 
-    if not imported_qt:
-        # Try PySide
-        from PySide import QtCore, QtGui
-    else:
+    if imported_qt:
         # Patch PySide2/PySide6 to keep the QtGui interface consistent with PySide (Qt 4).
         # We don't try to cover all cases, only the QtGui module as we are using components
         # from that which are different between Qt 5 and 4. Approach is taken from the
@@ -65,13 +59,3 @@ except ImportError:
         # Combine the attributes of the QtWidgets and QtGui into a new QtGui module.
         _move_attributes(QtGui, __PySide_QtWidgets, dir(__PySide_QtWidgets))
         _move_attributes(QtGui, __PySide_QtGui, dir(__PySide_QtGui))
-
-
-# Handle QRegExp / QRegularExpression
-if hasattr(QtCore, "QRegularExpression"):
-    qt_re_module = QtCore.QRegularExpression
-    qt_re_module_is_regular_expression = True
-else:
-    # NOTE remove once Qt4 support is removed
-    qt_re_module = QtCore.QRegExp
-    qt_re_module_is_regular_expression = False
