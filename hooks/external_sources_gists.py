@@ -10,10 +10,10 @@
 
 import json
 import os
+import urllib.request
 
 import sgtk
 from sgtk.platform.qt import QtGui
-from tank_vendor.six.moves import urllib
 
 HookBaseClass = sgtk.get_hook_baseclass()
 

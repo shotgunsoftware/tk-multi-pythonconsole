@@ -9,34 +9,20 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from datetime import datetime
+import html
 import os
-import sys
 from threading import Lock
+
+from .qt_importer import QtCore, QtGui
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
-
-if sys.version_info.major == 2:
-    from cgi import escape
-elif sys.version_info.major == 3:
-    from html import escape as escape
-
-from .qt_importer import QtCore, QtGui
-
 try:
     import sgtk
 except ImportError:
     sgtk = None
-
-try:
-    from tank_vendor import six
-except ImportError:
-    try:
-        import six
-    except ImportError:
-        six = None
 
 from .util import colorize
 
@@ -129,12 +115,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
         """
 
-        if six:
-            # if six can be imported sanitize the string.
-            # This may lead to unicode errors if not imported in Python 2
-            text = six.ensure_str(text)
-        else:
-            text = str(text)
+        text = str(text)
 
         with self._write_lock:
             text = self._to_html(text)
@@ -157,12 +138,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         if sgtk and sgtk.platform.current_engine():
             sgtk.platform.current_engine().logger.error(text)
 
-        if six:
-            # if six can be imported sanitize the string.
-            # This may lead to unicode errors if not imported in python 2
-            text = six.ensure_str(text)
-        else:
-            text = str(text)
+        text = str(text)
 
         # write the error
         with self._write_lock:
@@ -208,7 +184,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
     def _to_html(self, text, color=None):
         """Attempt to properly escape and color text for display."""
 
-        text = escape(text)
+        text = html.escape(text)
         text = text.replace(" ", "&nbsp;")
         text = text.replace("\n", "<br />")
 

@@ -135,12 +135,12 @@ def test_open_script(console_widget, current_path, script):
     assert console_widget.tabs.count() == 1
 
     # Check the contents of the widget.
-    # The contents won't be the same in python 2,
+    # The contents won't be the same in python 2, # TODO
     # so only tests the files whose python_version is the same or less than
     # the current python major version.
     widget = console_widget.tabs.widget(0)
     tab_contents = widget.input_widget.toPlainText()
-    with io.open(script, "r", encoding="utf-8") as f:
+    with open(script, "r", encoding="utf-8") as f:
         original_contents = f.read()
 
     assert tab_contents == original_contents
@@ -149,7 +149,7 @@ def test_open_script(console_widget, current_path, script):
 @pytest.mark.parametrize(
     "script, python_version, expected_output",
     [
-        ("resource_script.py", 2, "open script"),
+        ("resource_script.py", 2, "open script"),  # TODO migrate this test to Py3
         # Check that it handles error in an expected way.
         ("resource_script_error.py", 2, "NameError: name 'b' is not defined"),
         # Only compare the contents of this one in Python 3
@@ -167,6 +167,7 @@ def test_execute_script(
     """
     # Check that test's required python version the current version or below.
     # Due to the way the Python 2 handles the unicode, the output will come out differently compared to Python 3.
+    # TODO
     # So we are only checking some of the tests in Python 3.
     if python_version <= sys.version_info.major:
         script = os.path.join(current_path, script)
