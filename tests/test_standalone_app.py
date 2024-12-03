@@ -12,7 +12,6 @@
 import pytest
 import sys
 import os
-import io
 
 
 @pytest.fixture(scope="module")
