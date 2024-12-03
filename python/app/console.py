@@ -10,7 +10,6 @@
 
 from datetime import datetime
 import os
-import io
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
