@@ -35,7 +35,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
     def __init__(self, parent=None):
         """Initialize the widget."""
 
-        super(OutputStreamWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self.setReadOnly(True)
         self.setWordWrapMode(QtGui.QTextOption.NoWrap)
@@ -208,7 +208,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
             return True
 
-        return super(OutputStreamWidget, self).wheelEvent(event)
+        return super().wheelEvent(event)
 
     def zoom(self, direction):
         """

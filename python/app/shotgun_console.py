@@ -40,7 +40,7 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         :param parent: The console's parent widget.
         """
 
-        super(ShotgunPythonConsoleWidget, self).__init__(parent)
+        super().__init__(parent)
 
         # Use the engine passed in or default to the current engine
         self._engine = engine or current_engine()
@@ -111,7 +111,7 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         app.aboutToQuit.disconnect()
 
         self._save_settings()
-        super(ShotgunPythonConsoleWidget, self).closeEvent(event)
+        super().closeEvent(event)
 
     def _get_sg_globals(self):
         """
@@ -140,7 +140,7 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         The user must click and hold the open button to trigger the menu building.
         """
 
-        super(ShotgunPythonConsoleWidget, self)._build_open_file_menu()
+        super()._build_open_file_menu()
 
         app = sgtk.platform.current_bundle()
 

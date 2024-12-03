@@ -89,7 +89,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         :param parent: The parent widget.
         """
 
-        super(PythonInputWidget, self).__init__(parent)
+        super().__init__(parent)
 
         # local symbol table for this input widget.
         # match what dunders appear in an interactive python shell
@@ -267,7 +267,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             if self.remove_character_indentation():
                 event.accept()
             else:
-                super(PythonInputWidget, self).keyPressEvent(event)
+                super().keyPressEvent(event)
         elif (
             event.key() == QtCore.Qt.Key_Slash
             and event.modifiers() == QtCore.Qt.ControlModifier
@@ -282,7 +282,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             self.indent()
             event.accept()
         else:
-            super(PythonInputWidget, self).keyPressEvent(event)
+            super().keyPressEvent(event)
 
     def remove_character_indentation(self):
         """
@@ -537,7 +537,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         :param event: resize event object
         """
 
-        super(PythonInputWidget, self).resizeEvent(event)
+        super().resizeEvent(event)
 
         contents_rect = self.contentsRect()
         line_number_area_rect = QtCore.QRect(
@@ -629,7 +629,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
 
             return True
 
-        return super(PythonInputWidget, self).wheelEvent(event)
+        return super().wheelEvent(event)
 
     def zoom(self, direction):
         """
@@ -907,7 +907,7 @@ class _LineNumberArea(QtGui.QWidget):
         :param editor: The editor widget where line numbers will be displayed.
         """
 
-        super(_LineNumberArea, self).__init__(parent=editor)
+        super().__init__(parent=editor)
         self._editor = editor
 
     def paintEvent(self, event):

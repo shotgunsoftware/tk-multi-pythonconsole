@@ -34,7 +34,7 @@ class PythonConsoleWidget(QtGui.QWidget):
 
         :param parent: The console's parent widget.
         """
-        super(PythonConsoleWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self.tabs = PythonTabWidget(self)
 
@@ -298,7 +298,7 @@ class PythonTabWidget(QtGui.QTabWidget):
         :param parent:
         """
 
-        super(PythonTabWidget, self).__init__(parent)
+        super().__init__(parent)
 
         # setup the tabs on the bottom, make the closable and movable
         self.setTabPosition(QtGui.QTabWidget.South)
@@ -374,7 +374,7 @@ class PythonTabWidget(QtGui.QTabWidget):
                 self._prompt_rename_tab()
                 return True
 
-        return super(PythonTabWidget, self).eventFilter(obj, event)
+        return super().eventFilter(obj, event)
 
     def get_tab_info(self):
         """
@@ -481,7 +481,7 @@ class _PythonConsoleSplitter(QtGui.QSplitter):
         :param parent: The parent ``QtGui.QWidget``
         """
 
-        super(_PythonConsoleSplitter, self).__init__(orientation, parent)
+        super().__init__(orientation, parent)
 
         self.output_widget = OutputStreamWidget(parent=self)
         self.input_widget = PythonInputWidget(parent=self)
@@ -517,7 +517,7 @@ class _PythonInputInfoWidget(QtGui.QWidget):
         :param parent: The widget's parent.
         """
 
-        super(_PythonInputInfoWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self._column_lbl = QtGui.QLabel()
 
