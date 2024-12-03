@@ -8,9 +8,6 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-# allow context manager in python 2.5
-from __future__ import with_statement
-
 import math
 import traceback
 import re
@@ -211,42 +208,36 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         # exec the python code, redirecting any stdout to the ouptut signal.
         # also redirect stdin if need be
         if eval_code:
-            # Use two with statements inside each other as python 2.6 doesn't support passing a tuple
-            # and Python 3 doesn't support contextlib.nested().
-            with self._stdout_redirect:
-                with self._stdin_redirect:
-                    try:
-                        # Use our copy of locals to allow persistence between executions
-                        # We provide the locals dict as both the global and local scopes
-                        # So that any methods executed in the python console can access the top
-                        # level/global variables.
-                        # example:
-                        # a = "hello"
-                        # def do_something():
-                        #     print(a)
-                        # do_something()
-                        #
-                        # The above would fail if we don't provide the same dictionary for both scopes.
-                        results = eval(python_code, self._locals, self._locals)
-                    except Exception:
-                        # oops, error encountered. write/redirect to the error signal
-                        self._stderr_redirect.write(self._format_exc())
-                    else:
-                        self.results.emit(str(results))
+            with self._stdout_redirect, self._stdin_redirect:
+                try:
+                    # Use our copy of locals to allow persistence between executions
+                    # We provide the locals dict as both the global and local scopes
+                    # So that any methods executed in the python console can access the top
+                    # level/global variables.
+                    # example:
+                    # a = "hello"
+                    # def do_something():
+                    #     print(a)
+                    # do_something()
+                    #
+                    # The above would fail if we don't provide the same dictionary for both scopes.
+                    results = eval(python_code, self._locals, self._locals)
+                except Exception:
+                    # oops, error encountered. write/redirect to the error signal
+                    self._stderr_redirect.write(self._format_exc())
+                else:
+                    self.results.emit(str(results))
 
         # exec
         else:
-            # Use two with statements inside each other as python 2.6 doesn't support passing a tuple
-            # and Python 3 doesn't support contextlib.nested().
-            with self._stdout_redirect:
-                with self._stdin_redirect:
-                    try:
-                        # locals gets passed in as both global and locals to fix look up issues.
-                        # See example above in the if eval_code true block.
-                        exec(python_code, self._locals, self._locals)
-                    except Exception:
-                        # oops, error encountered. write/redirect to the error signal
-                        self._stderr_redirect.write(self._format_exc())
+            with self._stdout_redirect, self._stdin_redirect:
+                try:
+                    # locals gets passed in as both global and locals to fix look up issues.
+                    # See example above in the if eval_code true block.
+                    exec(python_code, self._locals, self._locals)
+                except Exception:
+                    # oops, error encountered. write/redirect to the error signal
+                    self._stderr_redirect.write(self._format_exc())
 
     def highlight_current_line(self):
         """Highlight the current line of the input widget."""
@@ -451,8 +442,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
             if r.is_integer():
                 n_spaces = n_spaces + 4
             else:
-                # math.floor returns an int in Python 3 and a float in Python 2 so ensure it's a int.
-                n_spaces = int(math.ceil(r) * 4)
+                n_spaces = math.ceil(r) * 4
 
             return (" " * n_spaces) + rest_of_line
 

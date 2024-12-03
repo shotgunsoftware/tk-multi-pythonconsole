@@ -8,20 +8,16 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from datetime import datetime
 import os
-import sys
+
+from datetime import datetime
 from threading import Lock
+from html import escape
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
 # Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
 # engine running.
-
-if sys.version_info.major == 2:
-    from cgi import escape
-elif sys.version_info.major == 3:
-    from html import escape as escape
 
 from .qt_importer import QtCore, QtGui
 
@@ -29,14 +25,6 @@ try:
     import sgtk
 except ImportError:
     sgtk = None
-
-try:
-    from tank_vendor import six
-except ImportError:
-    try:
-        import six
-    except ImportError:
-        six = None
 
 from .util import colorize
 
@@ -129,15 +117,8 @@ class OutputStreamWidget(QtGui.QTextBrowser):
 
         """
 
-        if six:
-            # if six can be imported sanitize the string.
-            # This may lead to unicode errors if not imported in Python 2
-            text = six.ensure_str(text)
-        else:
-            text = str(text)
-
         with self._write_lock:
-            text = self._to_html(text)
+            text = self._to_html(str(text))
             self.moveCursor(QtGui.QTextCursor.End)
             self.insertHtml(text)
             self._scroll_to_bottom()
@@ -157,16 +138,9 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         if sgtk and sgtk.platform.current_engine():
             sgtk.platform.current_engine().logger.error(text)
 
-        if six:
-            # if six can be imported sanitize the string.
-            # This may lead to unicode errors if not imported in python 2
-            text = six.ensure_str(text)
-        else:
-            text = str(text)
-
         # write the error
         with self._write_lock:
-            text = self._to_html(text, self._error_text_color())
+            text = self._to_html(str(text), self._error_text_color())
             self.moveCursor(QtGui.QTextCursor.End)
             self.insertHtml(text)
             self._scroll_to_bottom()

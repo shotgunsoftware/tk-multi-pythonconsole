@@ -9,23 +9,9 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import keyword as py_keywords
+import builtins
 
-# NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
-# stand alone fashion. This try/except allows portions of the console to be imported outside of a
-# Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
-# engine running.
 from .qt_importer import QtGui, QtCore
-
-try:
-    from tank_vendor.six.moves import builtins
-except ImportError:
-    import sys
-
-    if sys.version_info.major == 2:
-        import __builtin__ as builtins
-    elif sys.version_info.major == 3:
-        import builtins
-
 from .util import colorize
 
 # based on: https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting

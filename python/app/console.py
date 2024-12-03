@@ -237,11 +237,7 @@ class PythonConsoleWidget(QtGui.QWidget):
         if not path:
             return
 
-        # clear the contents, open and load the file
-        # Use io.open() instead of open() so that we can provide the encoding to use for python 2.6 > 2.7.
-        # Python 3 supports passing the encoding to open().
-        # FIXME: Using the encoding option makes things better but not perfect for unicode strings.
-        with io.open(path, "r", encoding="utf-8") as fh:
+        with open(path, "r", encoding="utf-8") as fh:
             python_script = "".join(fh.readlines())
             index = self.tabs.add_tab(
                 name=os.path.split(path)[-1],

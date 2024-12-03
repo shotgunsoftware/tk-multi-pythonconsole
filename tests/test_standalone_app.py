@@ -135,12 +135,9 @@ def test_open_script(console_widget, current_path, script):
     assert console_widget.tabs.count() == 1
 
     # Check the contents of the widget.
-    # The contents won't be the same in python 2,
-    # so only tests the files whose python_version is the same or less than
-    # the current python major version.
     widget = console_widget.tabs.widget(0)
     tab_contents = widget.input_widget.toPlainText()
-    with io.open(script, "r", encoding="utf-8") as f:
+    with open(script, "r", encoding="utf-8") as f:
         original_contents = f.read()
 
     assert tab_contents == original_contents
@@ -149,9 +146,9 @@ def test_open_script(console_widget, current_path, script):
 @pytest.mark.parametrize(
     "script, python_version, expected_output",
     [
-        ("resource_script.py", 2, "open script"),
+        ("resource_script.py", 3, "open script"),
         # Check that it handles error in an expected way.
-        ("resource_script_error.py", 2, "NameError: name 'b' is not defined"),
+        ("resource_script_error.py", 3, "NameError: name 'b' is not defined"),
         # Only compare the contents of this one in Python 3
         ("resource_script_containing_unicode.py", 3, "›š™º"),
         ("resource_script_surrogate_chars.py", 3, "𐀀𝄞"),
@@ -165,9 +162,7 @@ def test_execute_script(
     :param console_widget:
     :return:
     """
-    # Check that test's required python version the current version or below.
-    # Due to the way the Python 2 handles the unicode, the output will come out differently compared to Python 3.
-    # So we are only checking some of the tests in Python 3.
+    # Ensure the test's Python version requirement is satisfied.
     if python_version <= sys.version_info.major:
         script = os.path.join(current_path, script)
         console_widget.open(script)
