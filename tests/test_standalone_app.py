@@ -143,39 +143,36 @@ def test_open_script(console_widget, current_path, script):
 
 
 @pytest.mark.parametrize(
-    "script, python_version, expected_output",
+    "script, expected_output",
     [
-        ("resource_script.py", 3, "open script"),
+        ("resource_script.py", "open script"),
         # Check that it handles error in an expected way.
-        ("resource_script_error.py", 3, "NameError: name 'b' is not defined"),
-        # Only compare the contents of this one in Python 3
-        ("resource_script_containing_unicode.py", 3, "›š™º"),
-        ("resource_script_surrogate_chars.py", 3, "𐀀𝄞"),
+        ("resource_script_error.py", "NameError: name 'b' is not defined"),
+        ("resource_script_containing_unicode.py", "›š™º"),
+        ("resource_script_surrogate_chars.py", "𐀀𝄞"),
     ],
 )
 def test_execute_script(
-    console_widget, current_path, script, python_version, expected_output
+    console_widget, current_path, script, expected_output
 ):
     """
     Test opening a script in a new tab and executing it.
     :param console_widget:
     :return:
     """
-    # Ensure the test's Python version requirement is satisfied.
-    if python_version <= sys.version_info.major:
-        script = os.path.join(current_path, script)
-        console_widget.open(script)
+    script = os.path.join(current_path, script)
+    console_widget.open(script)
 
-        tab_widget = console_widget.tabs.widget(0)
-        # Get the Python console to execute the script
-        tab_widget.input_widget.execute()
+    tab_widget = console_widget.tabs.widget(0)
+    # Get the Python console to execute the script
+    tab_widget.input_widget.execute()
 
-        # The output text will add a `\n` to the end so we should add that to the expected output.
-        expected_output += "\n"
-        actual_output = tab_widget.output_widget.toPlainText()[-len(expected_output) :]
+    # The output text will add a `\n` to the end so we should add that to the expected output.
+    expected_output += "\n"
+    actual_output = tab_widget.output_widget.toPlainText()[-len(expected_output) :]
 
-        # Now check that the expected output was added to the end of the output widget text.
-        assert actual_output == expected_output
+    # Now check that the expected output was added to the end of the output widget text.
+    assert actual_output == expected_output
 
 
 # fmt: off

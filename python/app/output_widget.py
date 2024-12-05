@@ -11,23 +11,20 @@
 import os
 
 from datetime import datetime
-from threading import Lock
 from html import escape
+from threading import Lock
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
-# stand alone fashion. This try/except allows portions of the console to be imported outside of a
-# Shotgun/Toolkit environment. Flame, for example, uses the console when there is no Toolkit
+# stand alone fashion. Flame, for example, uses the console when there is no Toolkit
 # engine running.
 
 from .qt_importer import QtCore, QtGui
+from .util import colorize
 
 try:
     import sgtk
 except ImportError:
     sgtk = None
-
-from .util import colorize
-
 
 class OutputStreamWidget(QtGui.QTextBrowser):
     """A widget to display input, output, and errors."""

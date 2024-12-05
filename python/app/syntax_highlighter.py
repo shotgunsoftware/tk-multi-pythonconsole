@@ -8,11 +8,17 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import keyword as py_keywords
 import builtins
+import keyword as py_keywords
 
-from .qt_importer import QtGui, QtCore
+# NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
+# standalone fashion.
+# Flame, for example, uses the console when there is no Toolkit engine running.
+
+from .qt_importer import QtCore, QtGui
 from .util import colorize
+
+
 
 # based on: https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting
 
