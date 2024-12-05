@@ -152,9 +152,7 @@ def test_open_script(console_widget, current_path, script):
         ("resource_script_surrogate_chars.py", "𐀀𝄞"),
     ],
 )
-def test_execute_script(
-    console_widget, current_path, script, expected_output
-):
+def test_execute_script(console_widget, current_path, script, expected_output):
     """
     Test opening a script in a new tab and executing it.
     :param console_widget:

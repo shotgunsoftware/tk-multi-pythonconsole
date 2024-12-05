@@ -19,7 +19,6 @@ from .qt_importer import QtCore, QtGui
 from .util import colorize
 
 
-
 # based on: https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting
 
 

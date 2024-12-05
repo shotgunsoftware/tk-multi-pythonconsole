@@ -26,6 +26,7 @@ try:
 except ImportError:
     sgtk = None
 
+
 class OutputStreamWidget(QtGui.QTextBrowser):
     """A widget to display input, output, and errors."""
 
