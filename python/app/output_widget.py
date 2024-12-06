@@ -9,17 +9,17 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
-
 from datetime import datetime
 from html import escape
 from threading import Lock
+
+from .qt_importer import QtCore, QtGui
+from .util import colorize
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. Flame, for example, uses the console when there is no Toolkit
 # engine running.
 
-from .qt_importer import QtCore, QtGui
-from .util import colorize
 
 try:
     import sgtk
