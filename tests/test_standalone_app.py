@@ -12,7 +12,6 @@
 import pytest
 import sys
 import os
-import io
 
 
 @pytest.fixture(scope="module")
@@ -135,53 +134,43 @@ def test_open_script(console_widget, current_path, script):
     assert console_widget.tabs.count() == 1
 
     # Check the contents of the widget.
-    # The contents won't be the same in python 2,
-    # so only tests the files whose python_version is the same or less than
-    # the current python major version.
     widget = console_widget.tabs.widget(0)
     tab_contents = widget.input_widget.toPlainText()
-    with io.open(script, "r", encoding="utf-8") as f:
+    with open(script, "r", encoding="utf-8") as f:
         original_contents = f.read()
 
     assert tab_contents == original_contents
 
 
 @pytest.mark.parametrize(
-    "script, python_version, expected_output",
+    "script, expected_output",
     [
-        ("resource_script.py", 2, "open script"),
+        ("resource_script.py", "open script"),
         # Check that it handles error in an expected way.
-        ("resource_script_error.py", 2, "NameError: name 'b' is not defined"),
-        # Only compare the contents of this one in Python 3
-        ("resource_script_containing_unicode.py", 3, "›š™º"),
-        ("resource_script_surrogate_chars.py", 3, "𐀀𝄞"),
+        ("resource_script_error.py", "NameError: name 'b' is not defined"),
+        ("resource_script_containing_unicode.py", "›š™º"),
+        ("resource_script_surrogate_chars.py", "𐀀𝄞"),
     ],
 )
-def test_execute_script(
-    console_widget, current_path, script, python_version, expected_output
-):
+def test_execute_script(console_widget, current_path, script, expected_output):
     """
     Test opening a script in a new tab and executing it.
     :param console_widget:
     :return:
     """
-    # Check that test's required python version the current version or below.
-    # Due to the way the Python 2 handles the unicode, the output will come out differently compared to Python 3.
-    # So we are only checking some of the tests in Python 3.
-    if python_version <= sys.version_info.major:
-        script = os.path.join(current_path, script)
-        console_widget.open(script)
+    script = os.path.join(current_path, script)
+    console_widget.open(script)
 
-        tab_widget = console_widget.tabs.widget(0)
-        # Get the Python console to execute the script
-        tab_widget.input_widget.execute()
+    tab_widget = console_widget.tabs.widget(0)
+    # Get the Python console to execute the script
+    tab_widget.input_widget.execute()
 
-        # The output text will add a `\n` to the end so we should add that to the expected output.
-        expected_output += "\n"
-        actual_output = tab_widget.output_widget.toPlainText()[-len(expected_output) :]
+    # The output text will add a `\n` to the end so we should add that to the expected output.
+    expected_output += "\n"
+    actual_output = tab_widget.output_widget.toPlainText()[-len(expected_output) :]
 
-        # Now check that the expected output was added to the end of the output widget text.
-        assert actual_output == expected_output
+    # Now check that the expected output was added to the end of the output widget text.
+    assert actual_output == expected_output
 
 
 # fmt: off

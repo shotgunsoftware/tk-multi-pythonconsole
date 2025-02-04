@@ -10,7 +10,6 @@
 
 from datetime import datetime
 import os
-import io
 
 # NOTE: This repo is typically used as a Toolkit app, but it is also possible use the console in a
 # stand alone fashion. This try/except allows portions of the console to be imported outside of a
@@ -35,7 +34,7 @@ class PythonConsoleWidget(QtGui.QWidget):
 
         :param parent: The console's parent widget.
         """
-        super(PythonConsoleWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self.tabs = PythonTabWidget(self)
 
@@ -237,11 +236,7 @@ class PythonConsoleWidget(QtGui.QWidget):
         if not path:
             return
 
-        # clear the contents, open and load the file
-        # Use io.open() instead of open() so that we can provide the encoding to use for python 2.6 > 2.7.
-        # Python 3 supports passing the encoding to open().
-        # FIXME: Using the encoding option makes things better but not perfect for unicode strings.
-        with io.open(path, "r", encoding="utf-8") as fh:
+        with open(path, "r", encoding="utf-8") as fh:
             python_script = "".join(fh.readlines())
             index = self.tabs.add_tab(
                 name=os.path.split(path)[-1],
@@ -303,7 +298,7 @@ class PythonTabWidget(QtGui.QTabWidget):
         :param parent:
         """
 
-        super(PythonTabWidget, self).__init__(parent)
+        super().__init__(parent)
 
         # setup the tabs on the bottom, make the closable and movable
         self.setTabPosition(QtGui.QTabWidget.South)
@@ -379,7 +374,7 @@ class PythonTabWidget(QtGui.QTabWidget):
                 self._prompt_rename_tab()
                 return True
 
-        return super(PythonTabWidget, self).eventFilter(obj, event)
+        return super().eventFilter(obj, event)
 
     def get_tab_info(self):
         """
@@ -486,7 +481,7 @@ class _PythonConsoleSplitter(QtGui.QSplitter):
         :param parent: The parent ``QtGui.QWidget``
         """
 
-        super(_PythonConsoleSplitter, self).__init__(orientation, parent)
+        super().__init__(orientation, parent)
 
         self.output_widget = OutputStreamWidget(parent=self)
         self.input_widget = PythonInputWidget(parent=self)
@@ -522,7 +517,7 @@ class _PythonInputInfoWidget(QtGui.QWidget):
         :param parent: The widget's parent.
         """
 
-        super(_PythonInputInfoWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self._column_lbl = QtGui.QLabel()
 

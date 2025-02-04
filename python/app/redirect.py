@@ -26,7 +26,7 @@ class StdinRedirector(QtCore.QObject):
 
         :param parent: The parent qt object.
         """
-        super(StdinRedirector, self).__init__(parent)
+        super().__init__(parent)
         self._handle = None
         self._readline_callback = readline_callback
 
@@ -64,7 +64,7 @@ class StdoutRedirector(QtCore.QObject):
         :param tee: Also write to sys stdout when True.
         :param parent: The parent qt object.
         """
-        super(StdoutRedirector, self).__init__(parent)
+        super().__init__(parent)
         self._handle = None
         self._tee = tee
 
@@ -115,7 +115,7 @@ class StderrRedirector(QtCore.QObject):
         :param tee: Also write to sys stderr when True.
         :param parent: The parent qt object.
         """
-        super(StderrRedirector, self).__init__(parent)
+        super().__init__(parent)
 
     def write(self, msg):
         """Forward the written output to the error signal.
