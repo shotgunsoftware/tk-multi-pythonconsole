@@ -118,11 +118,47 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         Returns a dict of sg globals for the current engine.
         """
 
+        def safe_import(name, extra_base_paths=None):
+            import sys
+            import importlib
+            import site
+            import os
+            import glob
+
+            # Add both global and user site-packages paths
+            site_packages = []
+
+            # Global site-packages (sometimes empty in restricted environments like embedded interpreters)
+            try:
+                site_packages += site.getsitepackages()
+            except AttributeError:
+                pass  # getsitepackages() may not be available (e.g., in virtualenvs)
+
+            # User site-packages
+            site_packages.append(site.getusersitepackages())
+
+            # Additional custom base paths (e.g., unpacked FPT installations)
+            if extra_base_paths:
+                for base in extra_base_paths:
+                    site_packages += glob.glob(os.path.join(base, "**", "site-packages"), recursive=True)
+
+            # Append to sys.path if not already present
+            for path in site_packages:
+                if os.path.exists(path):
+                    sys.path.append(path)
+
+            try:
+                module = importlib.import_module(name)
+                return module
+            except Exception as e:
+                return None
+
         return {
             "tk": self._engine.tank,
             "shotgun": self._engine.shotgun,
             "context": self._engine.context,
             "engine": self._engine,
+            "safe_import": safe_import,
         }
 
     def _save_settings(self):
