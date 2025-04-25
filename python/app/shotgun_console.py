@@ -9,6 +9,8 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sys
+import json
+import subprocess
 
 import sgtk
 from sgtk.errors import TankError
@@ -118,40 +120,21 @@ class ShotgunPythonConsoleWidget(PythonConsoleWidget):
         Returns a dict of sg globals for the current engine.
         """
 
-        def safe_import(name, extra_base_paths=None):
-            import sys
-            import importlib
-            import site
-            import os
-            import glob
+        safe_import = None
 
-            # Add both global and user site-packages paths
-            site_packages = []
-
-            # Global site-packages (sometimes empty in restricted environments like embedded interpreters)
-            try:
-                site_packages += site.getsitepackages()
-            except AttributeError:
-                pass  # getsitepackages() may not be available (e.g., in virtualenvs)
-
-            # User site-packages
-            site_packages.append(site.getusersitepackages())
-
-            # Additional custom base paths (e.g., unpacked FPT installations)
-            if extra_base_paths:
-                for base in extra_base_paths:
-                    site_packages += glob.glob(os.path.join(base, "**", "site-packages"), recursive=True)
-
-            # Append to sys.path if not already present
-            for path in site_packages:
-                if os.path.exists(path):
-                    sys.path.append(path)
-
-            try:
-                module = importlib.import_module(name)
-                return module
-            except Exception as e:
-                return None
+        try:
+            utils = sgtk.platform.import_framework("tk-framework-shotgunutils", "utils")
+            safe_import = getattr(utils, "safe_import", None)
+            if not safe_import:
+                self._engine.logger.warning(
+                    "tk-framework-shotgunutils is available, but does not contain 'safe_import'. "
+                    "Are you using an outdated version of the framework?"
+                )
+        except Exception:
+            self._engine.logger.warning(
+                "Failed to import tk-framework-shotgunutils.utils. "
+                "The framework may not be registered or up to date."
+            )
 
         return {
             "tk": self._engine.tank,
