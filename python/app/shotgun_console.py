@@ -9,8 +9,6 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sys
-import json
-import subprocess
 
 import sgtk
 from sgtk.errors import TankError
