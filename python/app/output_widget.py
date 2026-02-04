@@ -229,9 +229,7 @@ class OutputStreamWidget(QtGui.QTextBrowser):
         QWidget {
             font-size: %spt;
         }
-        """ % (
-            size,
-        )
+        """ % (size,)
         self.setStyleSheet(style)
 
     def zoom_in(self):

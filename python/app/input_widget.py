@@ -652,9 +652,7 @@ class PythonInputWidget(QtGui.QPlainTextEdit):
         QWidget {
             font-size: %spt;
         }
-        """ % (
-            size,
-        )
+        """ % (size,)
         self.setStyleSheet(style)
 
     def zoom_in(self):
