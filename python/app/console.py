@@ -24,6 +24,9 @@ from .input_widget import PythonInputWidget
 from .output_widget import OutputStreamWidget
 from .util import colorize
 
+FONT_STEP = 1
+MIN_FONT_SIZE = 6
+MAX_FONT_SIZE = 32
 
 class PythonConsoleWidget(QtGui.QWidget):
     """A dockable, interactive python console widget."""
@@ -124,6 +127,28 @@ class PythonConsoleWidget(QtGui.QWidget):
             "Execute the current python script. Shortcut: Ctrl+Enter"
         )
 
+        # text size buttons
+        self._font_size = self.font().pointSize()
+        self.font_smaller_button = QtGui.QToolButton()
+        self.font_smaller_button.setText("A-")
+        self.font_smaller_button.setMinimumSize(QtCore.QSize(12, 12))
+        self.font_smaller_button.setMaximumSize(QtCore.QSize(12, 12))
+        self.font_smaller_button.setObjectName("text_decrease_btn")
+        self.font_smaller_button.setToolTip("Decrease console font size")
+        self.font_smaller_button.clicked.connect(
+            lambda: self._change_font_size(-FONT_STEP)
+        )
+
+        self.font_larger_button = QtGui.QToolButton()
+        self.font_larger_button.setText("A+")
+        self.font_larger_button.setMinimumSize(QtCore.QSize(12, 12))
+        self.font_larger_button.setMaximumSize(QtCore.QSize(12, 12))
+        self.font_larger_button.setObjectName("text_increase_btn")
+        self.font_larger_button.setToolTip("Increase console font size")
+        self.font_larger_button.clicked.connect(
+            lambda: self._change_font_size(+FONT_STEP)
+        )
+
         # add tab
         add_tab_btn = QtGui.QToolButton(self)
         add_tab_btn.setMinimumSize(QtCore.QSize(12, 12))
@@ -144,6 +169,9 @@ class PythonConsoleWidget(QtGui.QWidget):
         in_btn_box.addWidget(in_clear_btn)
         in_btn_box.addSpacing(10)
         in_btn_box.addWidget(self._line_num_btn)
+        in_btn_box.addSpacing(10)
+        in_btn_box.addWidget(self.font_smaller_button)
+        in_btn_box.addWidget(self.font_larger_button)
         in_btn_box.addSpacing(20)
         in_btn_box.addWidget(add_tab_btn)
         in_btn_box.addSpacing(4)
@@ -274,6 +302,23 @@ class PythonConsoleWidget(QtGui.QWidget):
         echo = self._cur_tab_widget().input_widget.echoing_output()
         self._out_echo_btn.setDown(echo)
         self._out_echo_btn.setChecked(echo)
+
+    def _change_font_size(self, delta):
+        """ Increase or decrease the font size of the current tab"""
+
+        self._font_size = max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, self._font_size + delta))
+        current_tab = self._cur_tab_widget()
+
+        widgets = [current_tab.input_widget, current_tab.output_widget,]
+        for widget in widgets:
+            font = widget.font()
+            font.setPointSize(self._font_size)
+            widget.setFont(font)
+
+            if hasattr(widget, "document"):
+                document = widget.document()
+                if document:
+                    document.setDefaultFont(font)
 
 
 class PythonTabWidget(QtGui.QTabWidget):
